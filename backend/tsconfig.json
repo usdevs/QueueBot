@@ -1,0 +1,19 @@
+{
+	"compilerOptions": {
+		/* Base */
+		"target": "es2022",
+		"esModuleInterop": true,
+		"allowJs": true,
+		"resolveJsonModule": true,
+		"moduleDetection": "force",
+
+		/* Strictness */
+		"strict": true,
+		// "noUncheckedIndexedAccess": true
+
+		"module": "CommonJS",
+		"rootDir": "src",
+		"outDir": "dist",
+		"types": ["node"]
+	}
+}
