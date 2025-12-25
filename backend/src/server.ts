@@ -1,20 +1,64 @@
-import Fastify from "fastify";
-import fastifyStatic from "@fastify/static";
-import path from "path";
+import Fastify, {type FastifyReply, type FastifyRequest} from 'fastify';
+import cors from '@fastify/cors'
+import * as jose from 'jose'
+import autoLoad from '@fastify/autoload';
+import { join } from 'path';
 
-const server = Fastify({ logger: true });
+const JWT_SECRET = process.env.JWT_SECRET!;
 
-/* Test if server working, delete when actually start dev
-server.register(fastifyStatic, {
-	root: path.join(process.cwd(), "public"),
+const fastify = Fastify({
+    logger: true
 });
 
-server.get("/test", async () => {
-	return { running: true };
+await fastify.register(cors, {
+    origin: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'User-Id'],
+    credentials: true,
 });
 
-server.listen({ port: 3000, host: "0.0.0.0" }).catch((err) => {
-	server.log.error(err);
-	process.exit(1);
+const authHook = async (request: FastifyRequest, reply: FastifyReply) => {
+
+    const secret = new TextEncoder().encode(
+        JWT_SECRET
+    );
+
+    try {
+
+        if (request.headers.authorization === undefined) {
+            return reply.code(400).send({"error": "Missing JWT token"});
+        }
+        const { payload } = await jose.jwtVerify(request.headers.authorization!, secret);
+
+        request.userId = payload.userId as number;
+
+    } catch (error) {
+        return reply.code(401).send({"error": "Unauthorized"})
+    }
+
+};
+
+fastify.register((fastify) => {
+
+    fastify.addHook("preHandler", authHook);
+
+    fastify.register(autoLoad, {
+        dir: join(process.cwd(), 'src/routes/private'),
+    });
+
 });
-*/
+
+
+fastify.register(autoLoad, {
+    dir: join(process.cwd(), 'src/routes/public'),
+});
+
+const start = async () => {
+    try {
+        await fastify.listen({ port: 3000 })
+    } catch (err) {
+        fastify.log.error(err)
+        process.exit(1)
+    }
+}
+start();
