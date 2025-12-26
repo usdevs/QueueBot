@@ -3,6 +3,7 @@ import cors from '@fastify/cors'
 import * as jose from 'jose'
 import autoLoad from '@fastify/autoload';
 import { join } from 'path';
+import prismaPlugin from './prismaPlugin.js';
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 
@@ -37,6 +38,9 @@ const authHook = async (request: FastifyRequest, reply: FastifyReply) => {
     }
 
 };
+
+// Init sql db connection
+fastify.register(prismaPlugin);
 
 fastify.register((fastify) => {
 
