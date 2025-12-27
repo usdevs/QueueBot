@@ -4,12 +4,21 @@ import * as jose from 'jose'
 import autoLoad from '@fastify/autoload';
 import { join } from 'path';
 import prismaPlugin from './prismaPlugin.js';
+import {
+    validatorCompiler,
+    serializerCompiler,
+    type ZodTypeProvider
+} from 'fastify-type-provider-zod';
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 
 const fastify = Fastify({
-    logger: true
-});
+    logger: process.env.NODE_ENV === "development",
+}).withTypeProvider<ZodTypeProvider>();
+
+// tell fastify to use zod for type validation
+fastify.setValidatorCompiler(validatorCompiler);
+fastify.setSerializerCompiler(serializerCompiler);
 
 await fastify.register(cors, {
     origin: true,
@@ -19,6 +28,11 @@ await fastify.register(cors, {
 });
 
 const authHook = async (request: FastifyRequest, reply: FastifyReply) => {
+
+    // bypass auth check during development
+    if (process.env.NODE_ENV === 'development') {
+        return
+    }
 
     const secret = new TextEncoder().encode(
         JWT_SECRET

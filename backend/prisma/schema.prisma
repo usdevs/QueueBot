@@ -13,7 +13,7 @@ model Organiser {
 }
 
 model QueueConfig {
-  id                 Int     @id
+  id                 Int     @id @default(autoincrement())
   positionBeforePing Int
   isOpen             Boolean
 }
