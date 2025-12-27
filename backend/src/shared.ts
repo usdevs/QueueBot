@@ -8,7 +8,7 @@ export async function isAdmin(request: FastifyRequest, reply: FastifyReply) {
 
     await request.server.prisma.organiser.findFirst({where: {telegram_id: request.userId!}}).then((user) => {
         if (user == null) {
-            return reply.code(401).send({"error": "Endpoint requires administrator privileges"});
+            return reply.code(403).send({"error": "Endpoint requires administrator privileges"});
         }
     });
 }

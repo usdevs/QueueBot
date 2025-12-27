@@ -34,8 +34,34 @@ npm run dev
 
 JWT check is toggled based on directory
 
-| Directory | Access Level | Description                             |
-| :--- | :--- |:----------------------------------------|
-| `src/routes/public` | **Unprotected** | Open endpoints like `/auth`.            |
-| `src/routes/private` | **Authenticated** | Requires a valid JWT to access.         |
+| Directory            | Access Level      | Description                     |
+|:---------------------|:------------------|:--------------------------------|
+| `src/routes/public`  | **Unprotected**   | Open endpoints like `/auth`.    |
+| `src/routes/private` | **Authenticated** | Requires a valid JWT to access. |
 
+## Endpoints Documentation
+
+### `/queue/status`
+To check if queue is opened or closed.
+- **Method:** `GET`
+- **Auth:** Require
+- **Success (200 OK):** `{ "status": boolean }`
+- **Possible Errors:**
+
+  | Code | Error Message         | Reason                           |
+  |:-----|:----------------------|:---------------------------------|
+  | 500  | `No queue configured` | No queue exists in the database. |
+
+### `/queue/status`
+Opens or closes the queue.
+- **Method:** `PATCH`
+- **Auth:** Require (Admin)
+- **Query Params:** `open=<boolean>`
+- **Success (200 OK):** Returns the full updated `QueueConfig` object.
+- **Possible Errors:**
+
+  | Code | Error Message | Reason                                      |
+  |:-----|:--------------|:--------------------------------------------|
+  | 400  |               | invalid query parameters                    |
+  | 403  | `Forbidden`   | User is not an admin.                       |
+  | 500  |               | Failed to write the update to the database. |
