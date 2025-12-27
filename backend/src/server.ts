@@ -29,19 +29,17 @@ await fastify.register(cors, {
 
 const authHook = async (request: FastifyRequest, reply: FastifyReply) => {
 
-    // bypass auth check during development
-    if (process.env.NODE_ENV === 'development') {
-        return
-    }
-
     const secret = new TextEncoder().encode(
         JWT_SECRET
     );
 
     try {
 
-        if (request.headers.authorization === undefined) {
-            return reply.code(400).send({"error": "Missing JWT token"});
+        // bypass auth check during development
+        if (request.headers.authorization == undefined) {
+            if (process.env.NODE_ENV !== 'development') {
+                return reply.code(400).send({"error": "Missing JWT token"});
+            }
         }
         const { payload } = await jose.jwtVerify(request.headers.authorization!, secret);
 

@@ -2,7 +2,7 @@ import 'fastify';
 
 declare module 'fastify' {
     interface FastifyRequest {
-        userId: number;
+        userId: number | undefined;
     }
 }
 

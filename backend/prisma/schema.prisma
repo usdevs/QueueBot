@@ -8,8 +8,8 @@ datasource db {
 }
 
 model Organiser {
-  id          Int @id @default(autoincrement())
-  telegram_id Int @unique
+  id          Int    @id @default(autoincrement())
+  telegram_id BigInt @unique
 }
 
 model QueueConfig {
@@ -19,6 +19,6 @@ model QueueConfig {
 }
 
 model Queue {
-  telegram_id Int      @unique
+  telegram_id BigInt   @unique
   timeCreated DateTime
 }

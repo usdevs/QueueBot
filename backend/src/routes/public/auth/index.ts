@@ -69,6 +69,11 @@ const route: FastifyPluginAsync = async (fastify, _) => {
 
     fastify.get('/', async (request, reply) => {
 
+        // Generate a valid JWT for development purpose
+        if (process.env.NODE_ENV === 'development') {
+            return reply.code(200).send({token: await newJWT(2202843044)});
+        }
+
         const [authType, authData = ''] = (request.headers.authorization || '').split(' ');
 
         switch (authType) {
