@@ -7,7 +7,7 @@ datasource db {
   provider = "postgresql"
 }
 
-model Organiser {
+model Admin {
   id          Int    @id @default(autoincrement())
   telegram_id BigInt @unique
 }
@@ -21,4 +21,10 @@ model QueueConfig {
 model Queue {
   telegram_id BigInt   @unique
   timeCreated DateTime
+}
+
+model AdminRequester {
+  id                Int    @id @default(autoincrement())
+  telegram_id       BigInt @unique
+  telegram_username String
 }

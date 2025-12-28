@@ -60,6 +60,7 @@ fastify.register((fastify) => {
 
     fastify.register(autoLoad, {
         dir: join(process.cwd(), 'src/routes/private'),
+        routeParams: true
     });
 
 });
@@ -67,6 +68,7 @@ fastify.register((fastify) => {
 
 fastify.register(autoLoad, {
     dir: join(process.cwd(), 'src/routes/public'),
+    routeParams: true
 });
 
 const start = async () => {
