@@ -39,12 +39,12 @@ JWT check is toggled based on directory
 | `src/routes/public`  | **Unprotected**   | Open endpoints like `/auth`.    |
 | `src/routes/private` | **Authenticated** | Requires a valid JWT to access. |
 
-## Endpoints Documentation
+## 🚀 Endpoint Documentation
 
 ### `/queue/status`
 To check if queue is opened or closed.
 - **Method:** `GET`
-- **Auth:** Require
+- **Auth:** Required
 - **Success (200 OK):** `{ "status": boolean }`
 - **Possible Errors:**
 
@@ -55,7 +55,7 @@ To check if queue is opened or closed.
 ### `/queue/status`
 Opens or closes the queue.
 - **Method:** `PATCH`
-- **Auth:** Require (Admin)
+- **Auth:** Required (Admin)
 - **Query Params:** `open=<boolean>`
 - **Success (200 OK):** Returns the full updated `QueueConfig` object.
 - **Possible Errors:**
@@ -65,3 +65,101 @@ Opens or closes the queue.
   | 400  |               | invalid query parameters                    |
   | 403  | `Forbidden`   | User is not an admin.                       |
   | 500  |               | Failed to write the update to the database. |
+
+### `/queue/config` 
+Retrieves the current queue configuration parameters.
+- **Method:** `GET`
+- **Auth:** Required (Admin)
+- **Success (200 OK):** Returns the full `QueueConfig` object.
+- **Possible Errors:**
+
+| Code | Error Message         | Reason                                          |
+|:-----|:----------------------|:------------------------------------------------|
+| 403  | `Forbidden`           | User is not an admin.                           |
+| 500  | `No queue configured` | No configuration record exists in the database. |
+
+---
+
+### `/queue/config` 
+Updates the configuration parameters for the queue.
+- **Method:** `PATCH`
+- **Auth:** Required (Admin)
+- **Query Params:** - `positionBeforePing=<number>`: The position threshold for sending a notification.
+- **Success (200 OK):** Returns the full updated `QueueConfig` object.
+- **Possible Errors:**
+
+| Code | Error Message         | Reason                                    |
+|:-----|:----------------------|:------------------------------------------|
+| 400  |                       | Invalid query parameters.                 |
+| 403  | `Forbidden`           | User is not an admin.                     |
+| 500  | `No queue configured` | No configuration record exists to update. |
+
+### `/admins` 
+Retrieves a list of all current users with administrative privileges.
+- **Method:** `GET`
+- **Auth:** Required (Admin)
+- **Success (200 OK):** Returns an array of `Admin` objects.
+- **Possible Errors:**
+
+| Code | Error Message | Reason                                                 |
+|:-----|:--------------|:-------------------------------------------------------|
+| 403  | `Forbidden`   | User is not an admin.                                  |
+
+---
+
+### `/admins/:targetId`
+Revokes administrative privileges from a specific user and removes them from the admin table.
+- **Method:** `DELETE`
+- **Auth:** Required (Admin)
+- **Path Params:** - `targetId=<string>`: The Telegram ID of the admin to be removed.
+- **Success (200 OK):** Returns a confirmation message.
+- **Possible Errors:**
+
+| Code | Error Message     | Reason                                             |
+|:-----|:------------------|:---------------------------------------------------|
+| 403  | `Forbidden`       | User is not an admin.                              |
+| 404  | `Admin not found` | No admin user exists with the provided `targetId`. |
+
+### `/admins/requests` 
+Retrieves a list of all current pending admin requests.
+- **Method:** `GET`
+- **Auth:** Required (Admin)
+- **Success (200 OK):** Returns an array of `AdminRequester` objects.
+- **Possible Errors:**
+
+| Code | Error Message | Reason                |
+|:-----|:--------------|:----------------------|
+| 403  | `Forbidden`   | User is not an admin. |
+
+
+---
+
+### `/admins/requests/:targetId`
+Submits a new request for a user to become an admin.
+- **Method:** `POST`
+- **Auth:** Required
+- **Path Params:** - `targetId=<string>`: The Telegram ID of the user requesting admin status.
+- **Query Params:** - `username=<string>`: The Telegram username of the requester.
+- **Success (200 OK):** Returns the created `AdminRequester` object.
+- **Possible Errors:**
+
+| Code | Error Message                     | Reason                                                         |
+|:-----|:----------------------------------|:---------------------------------------------------------------|
+| 400  | `Request for user already exists` | A request with this `targetId` already exists in the database. |
+
+---
+
+### `/admins/requests/:targetId`
+Accepts or rejects a pending admin request. If accepted, the user is moved from the requesters list to the admins list.
+- **Method:** `PATCH`
+- **Auth:** Required (Admin)
+- **Path Params:** - `targetId=<string>`: The Telegram ID of the requester to process.
+- **Query Params:** - `accepts=<boolean>`: Whether to grant admin status (`true`) or deny it (`false`).
+- **Success (200 OK):** Returns a confirmation message.
+- **Possible Errors:**
+
+| Code | Error Message           | Reason                                                                |
+|:-----|:------------------------|:----------------------------------------------------------------------|
+| 403  | `Forbidden`             | User is not an admin.                                                 |
+| 404  | `Requester not found`   | No pending request exists for the provided `targetId`.                |
+| 400  | `User is already admin` | The request was accepted, but the user is already in the admin table. |
