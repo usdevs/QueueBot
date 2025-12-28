@@ -82,12 +82,13 @@ const route: FastifyPluginAsync = async (fastify, _) => {
                     const appData = parseAuthData(authData);
                     validate(new URLSearchParams(authData), appData, BOT_TOKEN);
                     return reply.code(200).send({token: await newJWT(appData.user.id.toString())});
-                } catch (e) {
-                    console.error(e);
-                    return reply.code(500).send({"error": e});
+                } catch (e: any) {
+                    reply.code(500);
+                    throw new Error(e.message);
                 }
             default:
-                return reply.code(401).send({"error": "Unauthorized"});
+                reply.code(401);
+                throw new Error("Unauthorized");
         }
 
 

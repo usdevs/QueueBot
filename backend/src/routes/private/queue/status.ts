@@ -8,8 +8,9 @@ const route: FastifyPluginAsyncZod = async (fastify, _) => {
     // get queue status
     fastify.get('/status', async (request, reply) => {
         await fastify.prisma.queueConfig.findFirst().then((queueConfig) => {
-            if (queueConfig === null) {
-                return reply.code(500).send({error: 'No queue configured'});
+            if (queueConfig == null) {
+                reply.code(500);
+                throw new Error("No queue configured");
             }
             return reply.code(200).send({status: queueConfig.isOpen});
         })
@@ -21,13 +22,14 @@ const route: FastifyPluginAsyncZod = async (fastify, _) => {
         preHandler: isAdmin,
         schema: {
             querystring: z.object({
-                open: z.coerce.boolean(),
+                open: z.stringbool(),
             })}
         }, async (request, reply) => {
         let config = await fastify.prisma.queueConfig.findFirst().then((queueConfig) => queueConfig);
 
         if (config === null) {
-            return reply.code(500).send({error: 'No queue configured'});
+            reply.code(500);
+            throw new Error("No queue configured");
         }
 
         config.isOpen = request.query.open;
@@ -39,8 +41,9 @@ const route: FastifyPluginAsyncZod = async (fastify, _) => {
             data: config
         }).then((config) => {
             return reply.code(200).send(config);
-        }).catch((err) => {
-            return reply.code(500).send({error: err.message});
+        }).catch((e) => {
+            reply.code(500);
+            throw new Error(e.message);
         });
 
     });

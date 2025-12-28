@@ -9,7 +9,7 @@ declare module 'fastify' {
     }
 }
 
-const prismaPlugin: FastifyPluginAsync = fp(async (fastify, options) => {
+const prismaPlugin: FastifyPluginAsync = fp(async (fastify, _) => {
 
     const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
 

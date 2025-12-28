@@ -33,21 +33,19 @@ const authHook = async (request: FastifyRequest, reply: FastifyReply) => {
         JWT_SECRET
     );
 
-    try {
-
-        // bypass auth check during development
-        if (request.headers.authorization == undefined) {
-            if (process.env.NODE_ENV !== 'development') {
-                return reply.code(400).send({"error": "Missing JWT token"});
-            }
+    // bypass auth check during development
+    if (request.headers.authorization == undefined) {
+        if (process.env.NODE_ENV !== 'development') {
+            reply.code(400);
+            throw new Error("Missing JWT");
         }
-        const { payload } = await jose.jwtVerify(request.headers.authorization!, secret);
-
-        request.userId = payload.userId as string;
-
-    } catch (error) {
-        return reply.code(401).send({"error": "Unauthorized"})
     }
+    const { payload } = await jose.jwtVerify(request.headers.authorization!, secret).catch((_) => {
+        reply.code(401);
+        throw new Error("Unauthorized");
+    });
+
+    request.userId = payload.userId as string;
 
 };
 

@@ -68,9 +68,9 @@ const route: FastifyPluginAsyncZod = async (fastify, _) => {
         });
 
         await fastify.prisma.$transaction(async (tx) => {
-            await fastify.prisma.adminRequester.delete({where: {telegram_id: targetId}});
+            await tx.adminRequester.delete({where: {telegram_id: targetId}});
             if (accepts) {
-                await fastify.prisma.admin.create({
+                await tx.admin.create({
                     data: {
                         telegram_id: targetId,
                     }
