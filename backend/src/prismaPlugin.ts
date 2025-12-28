@@ -22,10 +22,11 @@ const prismaPlugin: FastifyPluginAsync = fp(async (fastify, options) => {
 
     // make prisma client accessible through fastify instance
     fastify.decorate('prisma', prisma)
-
     fastify.addHook('onClose', async (fastify) => {
         await fastify.prisma.$disconnect()
-    })
+    });
+
+
 })
 
 export default prismaPlugin

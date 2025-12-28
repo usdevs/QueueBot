@@ -43,7 +43,7 @@ const authHook = async (request: FastifyRequest, reply: FastifyReply) => {
         }
         const { payload } = await jose.jwtVerify(request.headers.authorization!, secret);
 
-        request.userId = payload.userId as number;
+        request.userId = payload.userId as string;
 
     } catch (error) {
         return reply.code(401).send({"error": "Unauthorized"})

@@ -7,7 +7,7 @@ import type {TelegramWebAppData, TelegramWebUser} from "../../../types.js";
 const BOT_TOKEN = process.env.BOT_TOKEN!;
 const JWT_SECRET = process.env.JWT_SECRET!;
 
-async function newJWT(userId: number) {
+async function newJWT(userId: string) {
 
     const secret = new TextEncoder().encode(
         JWT_SECRET
@@ -71,7 +71,7 @@ const route: FastifyPluginAsync = async (fastify, _) => {
 
         // Generate a valid JWT for development purpose
         if (process.env.NODE_ENV === 'development') {
-            return reply.code(200).send({token: await newJWT(2202843044)});
+            return reply.code(200).send({token: await newJWT("2202843044")});
         }
 
         const [authType, authData = ''] = (request.headers.authorization || '').split(' ');
@@ -81,7 +81,7 @@ const route: FastifyPluginAsync = async (fastify, _) => {
                 try {
                     const appData = parseAuthData(authData);
                     validate(new URLSearchParams(authData), appData, BOT_TOKEN);
-                    return reply.code(200).send({token: await newJWT(appData.user.id)});
+                    return reply.code(200).send({token: await newJWT(appData.user.id.toString())});
                 } catch (e) {
                     console.error(e);
                     return reply.code(500).send({"error": e});
