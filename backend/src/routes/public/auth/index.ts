@@ -22,6 +22,11 @@ async function newJWT(userId: string) {
 
 function parseAuthData(raw: string) : TelegramWebAppData {
     const params = new URLSearchParams(raw);
+
+    if (params.get('chat_instance') == undefined) {
+        throw new Error("Invalid Telegram auth string")
+    }
+
     return {
         auth_date: params.get('auth_date') ?? '',
         hash: params.get('hash') ?? '',
@@ -37,6 +42,11 @@ function validate(raw: URLSearchParams, appData: TelegramWebAppData, token: stri
     if (!appData.hash) throw new Error("Missing hash");
 
     if (!token) throw new Error("Missing token");
+
+    // ensure the auth string was generated in the past 12 hrs
+    if (((Date.now() - Date.parse(appData.auth_date)) / (3600 * 1000)) > 12) {
+        throw new Error("Expired Telegram auth string");
+    }
 
     const dataToCheck: string[] = [];
 
