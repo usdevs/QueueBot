@@ -21,7 +21,7 @@ fastify.setValidatorCompiler(validatorCompiler);
 fastify.setSerializerCompiler(serializerCompiler);
 
 await fastify.register(cors, {
-    origin: true,
+    origin: true, // set this to frontend url for production
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'User-Id'],
     credentials: true,
@@ -71,7 +71,7 @@ fastify.register(autoLoad, {
 
 const start = async () => {
     try {
-        await fastify.listen({ port: 3000 })
+        await fastify.listen({ port: 3000, host: '0.0.0.0' });
     } catch (err) {
         fastify.log.error(err)
         process.exit(1)

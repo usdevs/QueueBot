@@ -11,11 +11,6 @@
 		"target": "esnext",
 		"esModuleInterop": true,
 		"moduleResolution": "NodeNext",
-		"types": [],
-		// For nodejs:
-		// "lib": ["esnext"],
-		// "types": ["node"],
-		// and npm install -D @types/node
 
 		// Other Outputs
 		"sourceMap": true,
