@@ -78,7 +78,6 @@ Retrieves the current queue configuration parameters.
 | 403  | `Forbidden`           | User is not an admin.                           |
 | 500  | `No queue configured` | No configuration record exists in the database. |
 
----
 
 ### `/queue/config` 
 Updates the configuration parameters for the queue.
@@ -93,6 +92,17 @@ Updates the configuration parameters for the queue.
 | 400  |                       | Invalid query parameters.                 |
 | 403  | `Forbidden`           | User is not an admin.                     |
 | 500  | `No queue configured` | No configuration record exists to update. |
+
+### `/queue/next`
+Advances the queue by removing the person at the front and notifying the next `N` users in line via Telegram.
+- **Method:** `POST`
+- **Auth:** Required (Admin)
+- **Success (200 OK):** Returns the updated queue or a message if the queue is empty.
+- **Possible Errors:**
+
+| Code | Error Message | Reason |
+|:-----|:--------------|:-------|
+| 403  | `Forbidden`   | User is not authorized as an admin. |
 
 ### `/queue/entries` 
 Updates the configuration parameters for the queue.
@@ -153,7 +163,6 @@ Retrieves a list of all current users with administrative privileges.
 |:-----|:--------------|:-------------------------------------------------------|
 | 403  | `Forbidden`   | User is not an admin.                                  |
 
----
 
 ### `/admins/:targetId`
 Revokes administrative privileges from a specific user and removes them from the admin table.
@@ -180,8 +189,6 @@ Retrieves a list of all current pending admin requests.
 | 403  | `Forbidden`   | User is not an admin. |
 
 
----
-
 ### `/admins/requests/:targetId`
 Submits a new request for a user to become an admin.
 - **Method:** `POST`
@@ -195,7 +202,6 @@ Submits a new request for a user to become an admin.
 |:-----|:----------------------------------|:---------------------------------------------------------------|
 | 400  | `Request for user already exists` | A request with this `targetId` already exists in the database. |
 
----
 
 ### `/admins/requests/:targetId`
 Accepts or rejects a pending admin request. If accepted, the user is moved from the requesters list to the admins list.
