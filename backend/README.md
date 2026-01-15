@@ -94,6 +94,59 @@ Updates the configuration parameters for the queue.
 | 403  | `Forbidden`           | User is not an admin.                     |
 | 500  | `No queue configured` | No configuration record exists to update. |
 
+### `/queue/entries` 
+Updates the configuration parameters for the queue.
+- **Method:** `GET`
+- **Auth:** Required (Admin)
+- **Success (200 OK):** `{ "entries": Queue[] }`
+- **Possible Errors:**
+
+| Code | Error Message                   | Reason                                          |
+| :--- | :------------------------------ | :---------------------------------------------- |
+| 403  | `Forbidden`                     | User is not an admin.                           |
+| 500  | `Failed to fetch queue entries` | Failed to read queue entries from the database. |
+
+### `/queue/entries`
+Adds the current user to the queue.
+- **Method:** `POST`
+- **Auth:** Required
+- **Success (200 OK):** `{ "joined": boolean, "position": number, "ahead": number }`
+- **Possible Errors:**
+
+| Code | Error Message           | Reason                                                     |
+|:-----|:------------------------|:-----------------------------------------------------------|
+| 400  | `Queue not started`     | Queue is closed (not open for joining).                    |
+| 500  |                         | Failed to create the queue entry in the database.          |
+
+| Code | Error Message                 | Reason                                          |
+| :--- | :---------------------------- | :---------------------------------------------- |
+| 409  | `User already in queue`       | User is already in the queue.                   |
+| 500  | `No queue configured`         | No configuration record exists in the database. |
+
+### `/queue/entries/me`
+Removes the current user from the queue.
+- **Method:** `DELETE`
+- **Auth:** Required
+- **Success (200 OK):** `{ "left": true }`
+- **Possible Errors:**
+
+| Code | Error Message           | Reason                                          |
+| :--- | :---------------------- | :---------------------------------------------- |
+| 400  | `User not in queue`     | User is not currently in the queue.             |
+| 500  | `Failed to leave queue` | Failed to remove user from the queue.           |
+
+### `/queue/entries/me`
+Returns how many people are ahead of the current user in the queue.
+- **Method:** `GET`
+- **Auth:** Required
+- **Success (200 OK):** `{ "ahead": number }`
+- **Possible Errors:**
+
+| Code | Error Message                         | Reason                                          |
+| :--- | :------------------------------------ | :---------------------------------------------- |
+| 400  | `User not in queue`                   | User is not currently in the queue.             |
+| 500  | `No queue configured`                 | No configuration record exists in the database. |
+
 ### `/admins` 
 Retrieves a list of all current users with administrative privileges.
 - **Method:** `GET`
