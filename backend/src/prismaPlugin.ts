@@ -3,12 +3,6 @@ import type {FastifyPluginAsync} from 'fastify'
 import {PrismaClient} from "./generated/prisma/client.js";
 import { PrismaPg } from '@prisma/adapter-pg'
 
-declare module 'fastify' {
-    interface FastifyInstance {
-        prisma: PrismaClient
-    }
-}
-
 const prismaPlugin: FastifyPluginAsync = fp(async (fastify, _) => {
 
     const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
@@ -25,7 +19,6 @@ const prismaPlugin: FastifyPluginAsync = fp(async (fastify, _) => {
     fastify.addHook('onClose', async (fastify) => {
         await fastify.prisma.$disconnect()
     });
-
 
 })
 

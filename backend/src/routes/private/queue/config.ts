@@ -6,15 +6,8 @@ import {isAdmin} from "../../../shared.js";
 const route: FastifyPluginAsyncZod = async (fastify, _) => {
 
     // get config parameters
-    fastify.get('/config', {preHandler: isAdmin}, async (request, reply) => {
-        await fastify.prisma.queueConfig.findFirst().then((queueConfig) => {
-            if (queueConfig == null) {
-                reply.code(500);
-                throw new Error("No queue configured");
-            }
-            return reply.code(200).send(queueConfig);
-        })
-
+    fastify.get('/config', {preHandler: isAdmin}, async (_, reply) => {
+        return reply.code(200).send(await fastify.getQueueConfig())
     });
 
     // update config parameters
@@ -39,7 +32,9 @@ const route: FastifyPluginAsyncZod = async (fastify, _) => {
                 id: config.id
             },
             data: config
-        }).then((config) => {
+        }).then(async (config) => {
+            // refresh local copy of queueConfig
+            await fastify.getQueueConfig(true);
             return reply.code(200).send(config);
         }).catch((e) => {
             reply.code(500);

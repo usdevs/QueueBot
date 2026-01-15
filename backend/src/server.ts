@@ -9,6 +9,7 @@ import {
     serializerCompiler,
     type ZodTypeProvider
 } from 'fastify-type-provider-zod';
+import queueConfigPlugin from "./queueConfigPlugin.js";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 
@@ -51,6 +52,8 @@ const authHook = async (request: FastifyRequest, reply: FastifyReply) => {
 
 // Init sql db connection
 fastify.register(prismaPlugin);
+// Register customs plugins
+fastify.register(queueConfigPlugin);
 
 fastify.register((fastify) => {
 
