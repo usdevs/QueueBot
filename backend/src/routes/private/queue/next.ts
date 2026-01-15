@@ -12,7 +12,7 @@ const route: FastifyPluginAsyncZod = async (fastify, _) => {
         });
 
         if (allEntries.length === 0) {
-            return reply.code(200).send({message: "Queue is empty"});
+            return reply.code(200).send({entries: []});
         }
 
         const top = allEntries.shift();
@@ -34,7 +34,7 @@ const route: FastifyPluginAsyncZod = async (fastify, _) => {
             })
         }
 
-        return reply.code(200).send({allEntries: allEntries});
+        return reply.code(200).send({entries: allEntries});
 
     });
 
