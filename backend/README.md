@@ -41,6 +41,26 @@ JWT check is toggled based on directory
 
 ## 🚀 Endpoint Documentation
 
+### `/auth`
+Authenticates a user via Telegram Mini App (TMA) initialization data and issues a short-lived JWT. In development environments, it returns a mock token for testing purposes.
+
+- **Method:** `GET`
+- **Auth:** No
+- **Headers:**  `Authorization`: `tma <raw_init_data>`
+- **Success (200 OK):** Returns a signed JWT. `{ "token": "jwt" }`
+
+- **Possible Errors:**
+
+| Code | Error Message                  | Reason                                                                        |
+|:-----|:-------------------------------|:------------------------------------------------------------------------------|
+| 401  | `Unauthorized`                 | Authorization header is missing or prefix is not `tma`.                       |
+| 500  | `Invalid Telegram auth string` | The init data is malformed or missing required fields like `chat_instance`.   |
+| 500  | `Expired Telegram auth string` | The `auth_date` provided is older than 12 hours.                              |
+| 500  | `Invalid signature`            | The HMAC signature verification failed against the `BOT_TOKEN`.               |
+| 500  | `Missing hash`                 | The `hash` parameter is missing from the provided authentication data.        |
+
+> **Note:** When `NODE_ENV` is set to `development`, this endpoint returns a token for a default user ID (`2202843044`) without validating headers.
+
 ### `/queue/status`
 To check if queue is opened or closed.
 - **Method:** `GET`

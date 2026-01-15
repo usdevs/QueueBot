@@ -6,6 +6,8 @@ const queueConfigPlugin: FastifyPluginAsync = fp(async (fastify, _) => {
 
     let cacheConfig: QueueConfigModel | undefined;
 
+    // QueueConfig should only be accessed through this function to reduce calls to DB
+
     // force if true forces a db fetch
     let getQueueConfig: (force?: boolean) => Promise<QueueConfigModel> = async (force?: boolean) => {
         if (cacheConfig != null && !force) {
