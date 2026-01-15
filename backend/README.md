@@ -113,11 +113,6 @@ Adds the current user to the queue.
 - **Success (200 OK):** `{ "joined": boolean, "position": number, "ahead": number }`
 - **Possible Errors:**
 
-| Code | Error Message           | Reason                                                     |
-|:-----|:------------------------|:-----------------------------------------------------------|
-| 400  | `Queue not started`     | Queue is closed (not open for joining).                    |
-| 500  |                         | Failed to create the queue entry in the database.          |
-
 | Code | Error Message                 | Reason                                          |
 | :--- | :---------------------------- | :---------------------------------------------- |
 | 409  | `User already in queue`       | User is already in the queue.                   |
