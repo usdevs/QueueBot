@@ -5,7 +5,10 @@ import {isAdmin} from "../../../shared.js";
 
 const route: FastifyPluginAsyncZod = async (fastify, _) => {
 
-    // get queue status
+    /**
+    * GET /queue/status
+    * Checks if the queue is open
+    */
     fastify.get('/status', async (request, reply) => {
         await fastify.prisma.queueConfig.findFirst().then((queueConfig) => {
             if (queueConfig == null) {
@@ -17,7 +20,10 @@ const route: FastifyPluginAsyncZod = async (fastify, _) => {
 
     });
 
-    // update queue status
+    /**
+    * PATCH /queue/status (admin-only)
+    * Opens/closes the queue
+    */
     fastify.patch('/status', {
         preHandler: isAdmin,
         schema: {
