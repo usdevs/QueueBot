@@ -1,16 +1,16 @@
 import fp from 'fastify-plugin'
 import type {FastifyPluginAsync} from 'fastify'
 import {PrismaClient} from "./generated/prisma/client.js";
-import { PrismaPg } from '@prisma/adapter-pg'
+import {PrismaNeon} from "@prisma/adapter-neon";
 
 const prismaPlugin: FastifyPluginAsync = fp(async (fastify, _) => {
 
-    const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
-
     const prisma = new PrismaClient({
         log: [{ level: 'error', emit: 'event' }],
-        adapter: adapter,
-    });
+        adapter: new PrismaNeon({
+            connectionString: `${process.env.DATABASE_URL}`,
+        }),
+    })
 
     await prisma.$connect()
 
