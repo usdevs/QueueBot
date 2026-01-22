@@ -7,7 +7,7 @@ import type {TelegramWebAppData, TelegramWebUser} from "../../../types.js";
 const BOT_TOKEN = process.env.BOT_TOKEN!;
 const JWT_SECRET = process.env.JWT_SECRET!;
 
-async function newJWT(userId: number) {
+async function newJWT(userId: string) {
 
     const secret = new TextEncoder().encode(
         JWT_SECRET
@@ -22,6 +22,11 @@ async function newJWT(userId: number) {
 
 function parseAuthData(raw: string) : TelegramWebAppData {
     const params = new URLSearchParams(raw);
+
+    if (params.get('chat_instance') == undefined) {
+        throw new Error("Invalid Telegram auth string")
+    }
+
     return {
         auth_date: params.get('auth_date') ?? '',
         hash: params.get('hash') ?? '',
@@ -37,6 +42,11 @@ function validate(raw: URLSearchParams, appData: TelegramWebAppData, token: stri
     if (!appData.hash) throw new Error("Missing hash");
 
     if (!token) throw new Error("Missing token");
+
+    // ensure the auth string was generated in the past 12 hrs
+    if (((Date.now() - Date.parse(appData.auth_date)) / (3600 * 1000)) > 12) {
+        throw new Error("Expired Telegram auth string");
+    }
 
     const dataToCheck: string[] = [];
 
@@ -69,6 +79,11 @@ const route: FastifyPluginAsync = async (fastify, _) => {
 
     fastify.get('/', async (request, reply) => {
 
+        // Generate a valid JWT for development purpose
+        if (process.env.NODE_ENV === 'development') {
+            return reply.code(200).send({token: await newJWT("2202843044")});
+        }
+
         const [authType, authData = ''] = (request.headers.authorization || '').split(' ');
 
         switch (authType) {
@@ -76,13 +91,14 @@ const route: FastifyPluginAsync = async (fastify, _) => {
                 try {
                     const appData = parseAuthData(authData);
                     validate(new URLSearchParams(authData), appData, BOT_TOKEN);
-                    return reply.code(200).send({token: await newJWT(appData.user.id)});
-                } catch (e) {
-                    console.error(e);
-                    return reply.code(500).send({"error": e});
+                    return reply.code(200).send({token: await newJWT(appData.user.id.toString())});
+                } catch (e: any) {
+                    reply.code(500);
+                    throw new Error(e.message);
                 }
             default:
-                return reply.code(401).send({"error": "Unauthorized"});
+                reply.code(401);
+                throw new Error("Unauthorized");
         }
 
 
