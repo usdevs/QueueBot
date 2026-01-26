@@ -41,6 +41,7 @@ const authHook = async (request: FastifyRequest, reply: FastifyReply) => {
             throw new Error("Missing JWT");
         }
     }
+    console.log(request.headers.authorization);
     const { payload } = await jose.jwtVerify(request.headers.authorization!, secret).catch((_) => {
         reply.code(401);
         throw new Error("Unauthorized");

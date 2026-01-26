@@ -81,7 +81,7 @@ const route: FastifyPluginAsync = async (fastify, _) => {
 
         // Generate a valid JWT for development purpose
         if (process.env.NODE_ENV === 'development') {
-            return reply.code(200).send({token: await newJWT("2202843044")});
+            return reply.code(200).send({token: await newJWT("2202843044"), type: "user"});
         }
 
         const [authType, authData = ''] = (request.headers.authorization || '').split(' ');
@@ -91,7 +91,20 @@ const route: FastifyPluginAsync = async (fastify, _) => {
                 try {
                     const appData = parseAuthData(authData);
                     validate(new URLSearchParams(authData), appData, BOT_TOKEN);
-                    return reply.code(200).send({token: await newJWT(appData.user.id.toString())});
+
+                    let type: "admin" | "user" = "user";
+                    await fastify.prisma.admin.findFirst({where: {id: appData.user.id}}).then((res) => {
+                        if (res == null) {
+                            type = "user";
+                        } else {
+                            type = "admin";
+                        }
+                    }).catch((err) => {
+                        reply.code(500);
+                        throw err;
+                    })
+
+                    return reply.code(200).send({token: await newJWT(appData.user.id.toString()), type: type});
                 } catch (e: any) {
                     reply.code(500);
                     throw new Error(e.message);

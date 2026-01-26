@@ -42,12 +42,12 @@ JWT check is toggled based on directory
 ## 🚀 Endpoint Documentation
 
 ### `/auth`
-Authenticates a user via Telegram Mini App (TMA) initialization data and issues a short-lived JWT. In development environments, it returns a mock token for testing purposes.
+Authenticates a user via Telegram Mini App (TMA) initialization data and issues a short-lived JWT along with user permission level. In development environments, it returns a mock token for testing purposes.
 
 - **Method:** `GET`
 - **Auth:** No
 - **Headers:**  `Authorization`: `tma <raw_init_data>`
-- **Success (200 OK):** Returns a signed JWT. `{ "token": "jwt" }`
+- **Success (200 OK):** Returns a signed JWT. `{ "token": <jwt>, "type": "user" | "admin" }`
 
 - **Possible Errors:**
 

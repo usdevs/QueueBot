@@ -1,6 +1,6 @@
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
+const BACKEND_DEV_URL = 'http://localhost:3000';
+const BACKEND_PROD_URL = 'http://localhost:3000';
 
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
+export function createPath(path: string) {
+  return `${import.meta.env.DEV ? BACKEND_DEV_URL : BACKEND_PROD_URL}/${path}`;
 }

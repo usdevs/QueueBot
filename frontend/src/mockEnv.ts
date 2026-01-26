@@ -48,25 +48,8 @@ if (import.meta.env.DEV) {
         // Discover more launch parameters:
         // https://docs.telegram-mini-apps.com/platform/launch-parameters#parameters-list
         ['tgWebAppThemeParams', JSON.stringify(themeParams)],
-        // Your init data goes here. Learn more about it here:
-        // https://docs.telegram-mini-apps.com/platform/init-data#parameters-list
-        //
-        // Note that to make sure, you are using a valid init data, you must pass it exactly as it
-        // is sent from the Telegram application. The reason is in case you will sort its keys
-        // (auth_date, hash, user, etc.) or values your own way, init data validation will more
-        // likely to fail on your server side. So, to make sure you are working with a valid init
-        // data, it is better to take a real one from your application and paste it here. It should
-        // look something like this (a correctly encoded URL search params):
-        // ```
-        // user=%7B%22id%22%3A279058397%2C%22first_name%22%3A%22Vladislav%22%2C%22last_name%22...
-        // ```
-        // But in case you don't really need a valid init data, use this one:
-        ['tgWebAppData', new URLSearchParams([
-          ['auth_date', (new Date().getTime() / 1000 | 0).toString()],
-          ['hash', 'some-hash'],
-          ['signature', 'some-signature'],
-          ['user', JSON.stringify({ id: 1, first_name: 'Vladislav' })],
-        ]).toString()],
+        // Jaxon's Test Acc cred
+        ['tgWebAppData', "user=%7B%22id%22%3A2202843044%2C%22first_name%22%3A%22Test%22%2C%22last_name%22%3A%22%22%2C%22language_code%22%3A%22en%22%2C%22allows_write_to_pm%22%3Atrue%2C%22photo_url%22%3A%22https%3A%5C%2F%5C%2Fa-ttgme.stel.com%5C%2Fi%5C%2Fuserpic%5C%2F320%5C%2FR27QyEBmow6SE-HfD9bXUYl4e6S3NEDukQQMprJ__9PDJ8LRLiZEDgJgA81N9Dlv.svg%22%7D&chat_instance=2577593422149538393&chat_type=private&auth_date=1766548259&signature=mrJ3S96nkhfnKzLJArON3lsrLIMUC1QGOxxEQLJk9v9t-YULwj-I10Vo8x96torNZwu-QzLTfRM5XtanA_YwCA&hash=4394f474fb35423dbd9934418064271e797f2b65790f379a5aba3d610bfe24f6"],
         ['tgWebAppVersion', '8.4'],
         ['tgWebAppPlatform', 'tdesktop'],
       ]),

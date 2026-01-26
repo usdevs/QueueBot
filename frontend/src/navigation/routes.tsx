@@ -1,6 +1,7 @@
 import type { ComponentType, JSX } from 'react';
 
 import {AdminDashboard} from "@/pages/AdminDashboard.tsx";
+import {InitDataPage} from "@/pages/InitDataPage.tsx";
 
 interface Route {
   path: string;
@@ -10,5 +11,6 @@ interface Route {
 }
 
 export const routes: Route[] = [
-  { path: '/', Component: AdminDashboard },
+  { path: '/', Component: InitDataPage },
+  { path: '/dashboard', Component: AdminDashboard },
 ];
