@@ -19,6 +19,7 @@ model QueueConfig {
 }
 
 model Queue {
+  name        String
   telegram_id String   @unique
   timeCreated DateTime
 }

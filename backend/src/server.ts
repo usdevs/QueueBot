@@ -10,6 +10,7 @@ import {
     type ZodTypeProvider
 } from 'fastify-type-provider-zod';
 import queueConfigPlugin from "./queueConfigPlugin.js";
+import fastifySSE from "@fastify/sse";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 
@@ -23,10 +24,13 @@ fastify.setSerializerCompiler(serializerCompiler);
 
 await fastify.register(cors, {
     origin: true, // set this to frontend url for production
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'User-Id'],
     credentials: true,
 });
+
+// SSE
+// await fastify.register(fastifySSE);
 
 const authHook = async (request: FastifyRequest, reply: FastifyReply) => {
 
@@ -34,14 +38,10 @@ const authHook = async (request: FastifyRequest, reply: FastifyReply) => {
         JWT_SECRET
     );
 
-    // bypass auth check during development
     if (request.headers.authorization == undefined) {
-        if (process.env.NODE_ENV !== 'development') {
             reply.code(400);
             throw new Error("Missing JWT");
-        }
     }
-    console.log(request.headers.authorization);
     const { payload } = await jose.jwtVerify(request.headers.authorization!, secret).catch((_) => {
         reply.code(401);
         throw new Error("Unauthorized");

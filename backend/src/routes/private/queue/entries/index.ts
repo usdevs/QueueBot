@@ -1,5 +1,7 @@
 import type {FastifyPluginAsyncZod} from "fastify-type-provider-zod";
 import {isAdmin} from "../../../../shared.js";
+import {adjectives, animals, uniqueNamesGenerator} from "unique-names-generator";
+import {z} from "zod";
 
 const route: FastifyPluginAsyncZod = async (fastify) => {
 
@@ -9,8 +11,9 @@ const route: FastifyPluginAsyncZod = async (fastify) => {
      */
     fastify.get(
         "/",
-        {preHandler: isAdmin},
+        {preHandler: isAdmin,},
         async (_request, reply) => {
+
             try {
                 const entries = await fastify.prisma.queue.findMany({
                     orderBy: {timeCreated: "asc"},
@@ -20,8 +23,45 @@ const route: FastifyPluginAsyncZod = async (fastify) => {
                 reply.code(500);
                 throw new Error("Failed to fetch queue entries");
             }
+
         }
     );
+
+    fastify.delete("/:targetId", {
+        preHandler: isAdmin, schema: {
+            params: z.object({
+                targetId: z.string()
+            }),
+        },
+    }, async (request, reply) => {
+        await fastify.prisma.queue
+            .delete({
+                where: {telegram_id: request.params.targetId},
+            })
+            .then( async () => {
+
+                try {
+                    const entries = await fastify.prisma.queue.findMany({
+                        orderBy: {timeCreated: "asc"},
+                    });
+                    return reply.code(200).send({entries});
+                } catch (e: any) {
+                    reply.code(500);
+                    throw new Error("Failed to fetch updated queue entries");
+                }
+
+            })
+            .catch((e: any) => {
+                // Prisma "record not found" error code (user not in queue)
+                if (e?.code === "P2025") {
+                    reply.code(400);
+                    throw new Error("User not in queue");
+                }
+
+                reply.code(500);
+                throw new Error(e?.message ?? "Failed to remove user");
+            });
+    })
 
     /**
      * POST /queue/entries
@@ -48,9 +88,15 @@ const route: FastifyPluginAsyncZod = async (fastify) => {
                 throw new Error("User already in queue");
             }
 
+            const name = uniqueNamesGenerator({
+                dictionaries: [adjectives, animals], // colors can be omitted here as not used
+                length: 2
+            });
+
             // Add user to queue
             await fastify.prisma.queue.create({
                 data: {
+                    name: name,
                     telegram_id: userId,
                     timeCreated: new Date(),
                 },
