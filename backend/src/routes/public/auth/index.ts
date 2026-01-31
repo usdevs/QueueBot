@@ -93,7 +93,7 @@ const route: FastifyPluginAsync = async (fastify, _) => {
                     validate(new URLSearchParams(authData), appData, BOT_TOKEN);
 
                     let type: "admin" | "user" = "user";
-                    await fastify.prisma.admin.findFirst({where: {id: appData.user.id}}).then((res) => {
+                    await fastify.prisma.admin.findFirst({where: {telegram_id: appData.user.id.toString()}}).then((res) => {
                         if (res == null) {
                             type = "user";
                         } else {
