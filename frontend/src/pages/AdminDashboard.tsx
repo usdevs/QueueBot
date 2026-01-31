@@ -15,6 +15,7 @@ export function AdminDashboard() {
 
     const [queue, setQueue] = useState<QueueEntry[]>([]);
     const [inQueue, setInQueue] = useState(false);
+    const [username, setUsername] = useState("");
 
     const [peopleAhead, setPeopleAhead] = useState(null);
 
@@ -61,8 +62,10 @@ export function AdminDashboard() {
         fetch(createPath(`queue/entries`),
             {method: "POST", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
             .then(async (res) => {
-                setPeopleAhead((await res.json())['ahead']);
+                const me = (await res.json());
+                setPeopleAhead(me['ahead']);
                 setInQueue(true);
+                setUsername(me["name"]);
             });
     }
 
@@ -79,8 +82,10 @@ export function AdminDashboard() {
             {method: "GET", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
             .then(async (res) => {
                 if (res.status == 200) {
-                    setPeopleAhead((await res.json())["ahead"]);
+                    const me = (await res.json());
+                    setPeopleAhead(me["ahead"]);
                     setInQueue(true);
+                    setUsername(me["name"]);
                 }
             });
     }
@@ -163,9 +168,10 @@ export function AdminDashboard() {
                         queue={queue}
                         onRemove={handleRemove}
                         isPaused={isPaused}
-                    /> : inQueue ? (<>
-
-                    </>) : null}
+                    /> : inQueue ? (<div
+                        className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700 overflow-hidden">
+                        <p className="text-3xl text-white text-center m-4">{`You are ${username}!`}</p>
+                    </div>) : null}
             </div>
         </div>
     );

@@ -115,6 +115,7 @@ const route: FastifyPluginAsyncZod = async (fastify) => {
                 joined: true,
                 position,
                 ahead: position - 1,
+                name: name,
             });
         }
     );

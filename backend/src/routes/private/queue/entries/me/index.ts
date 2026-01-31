@@ -43,7 +43,6 @@ const route: FastifyPluginAsyncZod = async (fastify) => {
     // Fetch queue in order and locate the user
     const entries = await fastify.prisma.queue.findMany({
       orderBy: { timeCreated: "asc" },
-      select: { telegram_id: true },
     });
 
     const index = entries.findIndex((e) => e.telegram_id === userId);
@@ -56,6 +55,7 @@ const route: FastifyPluginAsyncZod = async (fastify) => {
 
     // index = number of people ahead (0 means you're first)
     return reply.code(200).send({
+      name: entries[index]!.name,
       ahead: index,
     });
   });
