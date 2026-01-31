@@ -74,6 +74,17 @@ export function AdminDashboard() {
             });
     };
 
+    const handleRefresh = async () => {
+        fetch(createPath("queue/entries/me"),
+            {method: "GET", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
+            .then(async (res) => {
+                if (res.status == 200) {
+                    setPeopleAhead((await res.json())["ahead"]);
+                    setInQueue(true);
+                }
+            });
+    }
+
     if (sessionStorage.getItem("jwt") == null) {
         return (<div>Error</div>);
     }
@@ -103,14 +114,7 @@ export function AdminDashboard() {
                         }));
                     });
             } else {
-                fetch(createPath("queue/entries/me"),
-                    {method: "GET", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
-                    .then(async (res) => {
-                        if (res.status == 200) {
-                            setPeopleAhead((await res.json())["ahead"]);
-                            setInQueue(true);
-                        }
-                    });
+                handleRefresh();
             }
 
         }
@@ -135,9 +139,11 @@ export function AdminDashboard() {
                 {/* Statistics */}
                 <QueueStats
                     userType={userType}
+                    isInQueue={inQueue}
                     peopleAhead={peopleAhead}
                     totalWaiting={queue.length}
                     isPaused={isPaused}
+                    onRefresh={handleRefresh}
                 />
 
                 {/* Controls */}
@@ -157,7 +163,9 @@ export function AdminDashboard() {
                         queue={queue}
                         onRemove={handleRemove}
                         isPaused={isPaused}
-                    /> : null}
+                    /> : inQueue ? (<>
+
+                    </>) : null}
             </div>
         </div>
     );
