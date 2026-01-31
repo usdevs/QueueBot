@@ -2,7 +2,6 @@ import Fastify, {type FastifyReply, type FastifyRequest} from 'fastify';
 import cors from '@fastify/cors'
 import * as jose from 'jose'
 import autoLoad from '@fastify/autoload';
-import { join } from 'path';
 import prismaPlugin from './prismaPlugin.js';
 import {
     validatorCompiler,
@@ -10,6 +9,11 @@ import {
     type ZodTypeProvider
 } from 'fastify-type-provider-zod';
 import queueConfigPlugin from "./queueConfigPlugin.js";
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 
@@ -69,7 +73,7 @@ fastify.register((fastify) => {
     fastify.addHook("preHandler", authHook);
 
     fastify.register(autoLoad, {
-        dir: join(process.cwd(), 'src/routes/private'),
+        dir: join(__dirname, 'routes/private'),
         routeParams: true
     });
 
@@ -77,7 +81,7 @@ fastify.register((fastify) => {
 
 
 fastify.register(autoLoad, {
-    dir: join(process.cwd(), 'src/routes/public'),
+    dir: join(__dirname, 'routes/public'),
     routeParams: true
 });
 
