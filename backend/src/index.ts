@@ -32,18 +32,6 @@ await fastify.register(cors, {
     credentials: true,
 });
 
-// SSE
-// await fastify.register(fastifySSE);
-
-process.on('uncaughtException', (err) => {
-    console.error('CRITICAL UNCAUGHT EXCEPTION:', err);
-    process.exit(1);
-});
-
-process.on('unhandledRejection', (reason, promise) => {
-    console.error('CRITICAL UNHANDLED REJECTION:', reason);
-});
-
 const authHook = async (request: FastifyRequest, reply: FastifyReply) => {
 
     const secret = new TextEncoder().encode(
@@ -94,9 +82,7 @@ const start = async () => {
 
         await fastify.listen({ port: 3000, host: '0.0.0.0' });
     } catch (err) {
-        // This will now catch "Path not found" for autoload or "DB connection failed"
         console.error('FATAL BOOT ERROR:', err);
-        fastify.log.error(err)
         process.exit(1)
     }
 }
