@@ -6,7 +6,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    base: '/nusc-queuebot/',
+    base: '/frontend/',
     css: {
         preprocessorOptions: {
             scss: {
