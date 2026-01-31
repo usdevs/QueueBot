@@ -10,7 +10,6 @@ import {
     type ZodTypeProvider
 } from 'fastify-type-provider-zod';
 import queueConfigPlugin from "./queueConfigPlugin.js";
-import fastifySSE from "@fastify/sse";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 
