@@ -19,16 +19,16 @@ export function AdminDashboard() {
 
     const [peopleAhead, setPeopleAhead] = useState(null);
 
-    const handleRemove = (id: string) => {
-        fetch(createPath(`queue/entries/${id}`),
+    const handleRemove = async (id: string) => {
+        await fetch(createPath(`queue/entries/${id}`),
             {method: "DELETE", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
             .then(async (res) => {
                 setQueue((await res.json())['entries']);
             });
     };
 
-    const handleLeaveQueue = () => {
-        fetch(createPath(`queue/entries/me`),
+    const handleLeaveQueue = async () => {
+        await fetch(createPath(`queue/entries/me`),
             {method: "DELETE", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
             .then(async (_) => {
                 setPeopleAhead(null);
@@ -43,8 +43,8 @@ export function AdminDashboard() {
     //     }
     // };
 
-    const handleAdvanceQueue = () => {
-        fetch(createPath("queue/next"),
+    const handleAdvanceQueue = async () => {
+        await fetch(createPath("queue/next"),
             {method: "POST", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
             .then(async (res) => {
                 let entries: any[] = (await res.json())['entries'];
@@ -58,8 +58,8 @@ export function AdminDashboard() {
             });
     };
 
-    const handleJoinQueue = () => {
-        fetch(createPath(`queue/entries`),
+    const handleJoinQueue = async () => {
+        await fetch(createPath(`queue/entries`),
             {method: "POST", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
             .then(async (res) => {
                 const me = (await res.json());
@@ -69,8 +69,8 @@ export function AdminDashboard() {
             });
     }
 
-    const handleTogglePause = () => {
-        fetch(createPath(`queue/status?open=${isPaused}`),
+    const handleTogglePause = async () => {
+        await fetch(createPath(`queue/status?open=${isPaused}`),
             {method: "PATCH", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
             .then(async (res) => {
                 setIsPaused(!(await res.json())['isOpen']);
@@ -78,7 +78,7 @@ export function AdminDashboard() {
     };
 
     const handleRefresh = async () => {
-        fetch(createPath("queue/entries/me"),
+        await fetch(createPath("queue/entries/me"),
             {method: "GET", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
             .then(async (res) => {
                 if (res.status == 200) {

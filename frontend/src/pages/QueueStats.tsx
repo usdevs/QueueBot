@@ -1,4 +1,5 @@
 import {Users, CheckCircle, PauseCircle, RefreshCw} from 'lucide-react';
+import LoadingButton from "@/components/LoadingButton.tsx";
 
 interface QueueStatsProps {
   userType: "user" | "admin";
@@ -17,7 +18,10 @@ export function QueueStats({ userType, onRefresh, isInQueue, peopleAhead, totalW
                 <div className="flex-1">
                     <div className="flex flex-row">
                         <p className="text-slate-400 text-xs md:text-sm mb-1">{userType == "admin" ? "People Waiting" : "People Ahead"}</p>
-                        <RefreshCw className={`w-4 h-4 ml-2 ${isInQueue ? 'visible' : 'invisible'}`} onClick={onRefresh}></RefreshCw>
+                        <LoadingButton className={`w-4 h-4 ml-2 ${isInQueue ? 'visible' : 'invisible'}`} onClick={onRefresh}>
+                            <RefreshCw className="w-4 h-4"/>
+                        </LoadingButton>
+
                     </div>
                     <p className="text-2xl md:text-3xl">{userType == "admin" ? totalWaiting : peopleAhead ?? "-"}</p>
                 </div>
