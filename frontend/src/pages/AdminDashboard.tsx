@@ -3,6 +3,7 @@ import {QueueStats} from './QueueStats';
 import {QueueControls} from './QueueControls';
 import {QueueList} from './QueueList';
 import {createPath} from "@/components/utils.ts";
+import {Page} from "@/components/Page.tsx";
 
 export interface QueueEntry {
     id: string;
@@ -129,6 +130,7 @@ export function AdminDashboard() {
     }, []);
 
     return (
+        <Page>
         <div className="min-h-screen bg-slate-950 text-white p-3 md:p-8">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
@@ -174,5 +176,6 @@ export function AdminDashboard() {
                     </div>) : null}
             </div>
         </div>
+        </Page>
     );
 }
