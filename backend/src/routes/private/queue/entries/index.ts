@@ -1,6 +1,6 @@
 import type {FastifyPluginAsyncZod} from "fastify-type-provider-zod";
 import {isAdmin} from "../../../../shared.js";
-import {adjectives, animals, uniqueNamesGenerator} from "unique-names-generator";
+import {colors, animals, uniqueNamesGenerator} from "unique-names-generator";
 import {z} from "zod";
 
 const route: FastifyPluginAsyncZod = async (fastify) => {
@@ -89,7 +89,7 @@ const route: FastifyPluginAsyncZod = async (fastify) => {
             }
 
             const name = uniqueNamesGenerator({
-                dictionaries: [adjectives, animals], // colors can be omitted here as not used
+                dictionaries: [colors, animals],
                 length: 2
             });
 

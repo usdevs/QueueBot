@@ -24,16 +24,22 @@ export function AdminDashboard() {
         await fetch(createPath(`queue/entries/${id}`),
             {method: "DELETE", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
             .then(async (res) => {
-                setQueue((await res.json())['entries']);
+                if (res.status == 200) {
+                    setQueue((await res.json())['entries']);
+                }
+
             });
     };
 
     const handleLeaveQueue = async () => {
         await fetch(createPath(`queue/entries/me`),
             {method: "DELETE", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
-            .then(async (_) => {
-                setPeopleAhead(null);
-                setInQueue(false);
+            .then(async (res) => {
+                if (res.status == 200) {
+                    setInQueue(false);
+                    // fetch queue stats
+                    handleRefresh();
+                }
             });
     };
 
@@ -48,14 +54,16 @@ export function AdminDashboard() {
         await fetch(createPath("queue/next"),
             {method: "POST", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
             .then(async (res) => {
-                let entries: any[] = (await res.json())['entries'];
-                setQueue(entries.map((entry) => {
-                    return {
-                        name: entry['name'],
-                        joinedAt: new Date(entry['timeCreated']),
-                        id: entry['telegram_id']
-                    };
-                }));
+                if (res.status == 200) {
+                    let entries: any[] = (await res.json())['entries'];
+                    setQueue(entries.map((entry) => {
+                        return {
+                            name: entry['name'],
+                            joinedAt: new Date(entry['timeCreated']),
+                            id: entry['telegram_id']
+                        };
+                    }));
+                }
             });
     };
 
@@ -63,10 +71,12 @@ export function AdminDashboard() {
         await fetch(createPath(`queue/entries`),
             {method: "POST", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
             .then(async (res) => {
-                const me = (await res.json());
-                setPeopleAhead(me['ahead']);
-                setInQueue(true);
-                setUsername(me["name"]);
+                if (res.status == 201) {
+                    const me = (await res.json());
+                    setPeopleAhead(me['ahead']);
+                    setInQueue(true);
+                    setUsername(me["name"]);
+                }
             });
     }
 
@@ -74,7 +84,9 @@ export function AdminDashboard() {
         await fetch(createPath(`queue/status?open=${isPaused}`),
             {method: "PATCH", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
             .then(async (res) => {
-                setIsPaused(!(await res.json())['isOpen']);
+                if (res.status == 200) {
+                    setIsPaused(!(await res.json())['isOpen']);
+                }
             });
     };
 
@@ -85,8 +97,10 @@ export function AdminDashboard() {
                 if (res.status == 200) {
                     const me = (await res.json());
                     setPeopleAhead(me["ahead"]);
-                    setInQueue(true);
-                    setUsername(me["name"]);
+                    if (me["name"] != undefined) {
+                        setInQueue(true);
+                        setUsername(me["name"]);
+                    }
                 }
             });
     }
@@ -103,21 +117,26 @@ export function AdminDashboard() {
             fetch(createPath("queue/status"),
                 {method: "GET", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
                 .then(async (res) => {
-                    setIsPaused(!(await res.json())['status']);
+                    if (res.status == 200) {
+                        setIsPaused(!(await res.json())['status']);
+                    }
                 });
 
             if (userType == "admin") {
                 fetch(createPath("queue/entries"),
                     {method: "GET", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
                     .then(async (res) => {
-                        let entries: any[] = (await res.json())['entries'];
-                        setQueue(entries.map((entry) => {
-                            return {
-                                name: entry['name'],
-                                joinedAt: new Date(entry['timeCreated']),
-                                id: entry['telegram_id']
-                            };
-                        }));
+                        if (res.status == 200) {
+                            let entries: any[] = (await res.json())['entries'];
+                            setQueue(entries.map((entry) => {
+                                return {
+                                    name: entry['name'],
+                                    joinedAt: new Date(entry['timeCreated']),
+                                    id: entry['telegram_id']
+                                };
+                            }));
+                        }
+
                     });
             } else {
                 handleRefresh();

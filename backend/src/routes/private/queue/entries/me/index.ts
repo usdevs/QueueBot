@@ -47,16 +47,10 @@ const route: FastifyPluginAsyncZod = async (fastify) => {
 
     const index = entries.findIndex((e) => e.telegram_id === userId);
 
-    // User not in queue
-    if (index === -1) {
-      reply.code(400);
-      throw new Error("User not in queue");
-    }
-
-    // index = number of people ahead (0 means you're first)
+    // index = number of people ahead (0 means you're first), (-1 means not in queue)
     return reply.code(200).send({
-      name: entries[index]!.name,
-      ahead: index,
+      name: index == -1 ? undefined : entries[index]!.name,
+      ahead: index == -1 ? entries.length : index,
     });
   });
 
