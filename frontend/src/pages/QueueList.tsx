@@ -47,7 +47,7 @@ export function QueueList({ queue, onRemove, isPaused }: QueueListProps) {
                         No one is in line yet.
                     </div>
                 ) : (
-                    queue.map((entry, index) => (
+                    queue.map((entry, index) => entry == null ? null : (
                         <div key={entry.id} className="p-4 bg-slate-900/30 flex items-center gap-4">
 
                             {/* Position */}
@@ -61,7 +61,7 @@ export function QueueList({ queue, onRemove, isPaused }: QueueListProps) {
                                 <p className="text-slate-100 font-medium truncate">{entry.name}</p>
                                 <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-1">
                                     <Clock className="w-3 h-3" />
-                                    <span>{entry.joinedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                    <span>{entry?.joinedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">

@@ -19,12 +19,16 @@ const route: FastifyPluginAsyncZod = async (fastify, _) => {
         // remove top user from the queue
         await fastify.prisma.queue.delete({where: {telegram_id: top!.telegram_id}});
 
-        const message = `Your turn is coming up! Please start making your way over.`
-
         // pings the top n user
         for (let i = 0; i < (await fastify.getQueueConfig()).positionBeforePing; i++) {
             if (allEntries[i] == undefined) {
                 break;
+            }
+            let message;
+            if (i == 0) {
+                message = `IT'S YOUR TURN NOW!!!`
+            } else {
+                message = `Your turn is coming up! Only ${i} person ahead.\nPlease start making your way over.`
             }
             const queryString = new URLSearchParams(
                 {'chat_id': allEntries[i]!.telegram_id, 'text': message, 'parse_mode': 'Markdown'}).toString();

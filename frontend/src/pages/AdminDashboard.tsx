@@ -165,9 +165,9 @@ export function AdminDashboard() {
                 {/* Statistics */}
                 <QueueStats
                     userType={userType}
-                    isInQueue={inQueue}
                     peopleAhead={peopleAhead}
                     totalWaiting={queue.length}
+                    isInQueue={inQueue}
                     isPaused={isPaused}
                     onRefresh={handleRefresh}
                 />
