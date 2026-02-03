@@ -91,18 +91,27 @@ export function AdminDashboard() {
     };
 
     const handleRefresh = async () => {
-        await fetch(createPath("queue/entries/me"),
-            {method: "GET", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
-            .then(async (res) => {
-                if (res.status == 200) {
-                    const me = (await res.json());
-                    setPeopleAhead(me["ahead"]);
-                    if (me["name"] != undefined) {
-                        setInQueue(true);
-                        setUsername(me["name"]);
+        await Promise.all([
+            fetch(createPath("queue/status"),
+                {method: "GET", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
+                .then(async (res) => {
+                    if (res.status == 200) {
+                        setIsPaused(!(await res.json())['status']);
                     }
-                }
-            });
+                }),
+            fetch(createPath("queue/entries/me"),
+                {method: "GET", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
+                .then(async (res) => {
+                    if (res.status == 200) {
+                        const me = (await res.json());
+                        setPeopleAhead(me["ahead"]);
+                        if (me["name"] != undefined) {
+                            setInQueue(true);
+                            setUsername(me["name"]);
+                        }
+                    }
+                })
+        ]);
     }
 
     if (sessionStorage.getItem("jwt") == null) {
