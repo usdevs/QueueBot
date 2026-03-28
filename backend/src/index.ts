@@ -73,25 +73,14 @@ fastify.register(autoLoad, {
     routeParams: true
 });
 
-if (process.env.NODE_ENV !== 'production') {
-    const start = async () => {
-        try {
-            console.log("Starting Fastify locally...");
-            await fastify.ready();
-            await fastify.listen({ port: 3000, host: '0.0.0.0' });
-            console.log("Server listening on http://localhost:3000");
-        } catch (err) {
-            console.error('FATAL BOOT ERROR:', err);
-            process.exit(1)
-        }
+const start = async () => {
+    try {
+        await fastify.ready();
+        await fastify.listen({ port: 3000, host: '0.0.0.0' });
+    } catch (err) {
+        console.error('FATAL BOOT ERROR:', err);
+        process.exit(1)
     }
-    start();
 }
 
-export default async function handler(req: any, res: any) {
-    // Wait for Fastify to load plugins
-    await fastify.ready();
-    // Emit the request event to Fastify's internal router
-    fastify.server.emit('request', req, res);
-}
-
+start();
