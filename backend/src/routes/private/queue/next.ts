@@ -32,10 +32,11 @@ const route: FastifyPluginAsyncZod = async (fastify, _) => {
             }
             const queryString = new URLSearchParams(
                 {'chat_id': allEntries[i]!.telegram_id, 'text': message, 'parse_mode': 'Markdown'}).toString();
+            console.log(message);
             // hit Telegram API to send user message
-            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?${queryString}`, {
-                method: 'POST',
-            })
+            // fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?${queryString}`, {
+            //     method: 'POST',
+            // })
         }
 
         return reply.code(200).send({entries: allEntries});

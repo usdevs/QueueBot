@@ -25,7 +25,7 @@ export function AdminDashboard() {
             {method: "DELETE", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
             .then(async (res) => {
                 if (res.status == 200) {
-                    setQueue((await res.json())['entries']);
+                    reloadQueue((await res.json())['entries']);
                 }
 
             });
@@ -42,6 +42,17 @@ export function AdminDashboard() {
                 }
             });
     };
+
+    // transform the object list into a list of QueueEntry and update the queue
+    const reloadQueue = (entries: any[]) => {
+        setQueue(entries.map((entry) => {
+            return {
+                name: entry['name'],
+                joinedAt: new Date(entry['timeCreated']),
+                id: entry['telegram_id']
+            };
+        }));
+    }
 
     // Unimplemented
     // const handleClearQueue = () => {
@@ -136,14 +147,7 @@ export function AdminDashboard() {
                     {method: "GET", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
                     .then(async (res) => {
                         if (res.status == 200) {
-                            let entries: any[] = (await res.json())['entries'];
-                            setQueue(entries.map((entry) => {
-                                return {
-                                    name: entry['name'],
-                                    joinedAt: new Date(entry['timeCreated']),
-                                    id: entry['telegram_id']
-                                };
-                            }));
+                            reloadQueue((await res.json())['entries']);
                         }
 
                     });
