@@ -20,7 +20,7 @@ const route: FastifyPluginAsyncZod = async (fastify, _) => {
         await fastify.prisma.queue.delete({where: {telegram_id: top!.telegram_id}});
 
         // pings the top n user
-        for (let i = 0; i < (await fastify.getQueueConfig()).positionBeforePing; i++) {
+        for (let i = 0; i < (await fastify.queueHandler.getQueueConfig()).positionBeforePing; i++) {
             if (allEntries[i] == undefined) {
                 break;
             }

@@ -4,9 +4,19 @@ import type {FastifyPluginAsync} from "fastify";
 // TODO: remove later
 const route: FastifyPluginAsync = async (fastify, _) => {
 
-    fastify.get('/', async (request, reply) => {
+    fastify.get('/', {sse: true}, async (request, reply) => {
         // get number of admins
-        fastify.prisma.admin.count().then((count) => console.log(count));
+
+        reply.sse.keepAlive();
+        fastify.queueHandler.add(reply.sse);
+
+        reply.sse.onClose(() => {
+            console.log('Connection closed')
+        })
+
+        await reply.sse.send({ data: 'Connected' + fastify.queueHandler.length()})
+
+        // fastify.prisma.admin.count().then((count) => console.log(count));
 
     });
 

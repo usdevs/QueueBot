@@ -7,7 +7,7 @@ const route: FastifyPluginAsyncZod = async (fastify, _) => {
 
     // get config parameters
     fastify.get('/config', {preHandler: isAdmin}, async (_, reply) => {
-        return reply.code(200).send(await fastify.getQueueConfig())
+        return reply.code(200).send(await fastify.queueHandler.getQueueConfig())
     });
 
     // update config parameters
@@ -18,7 +18,7 @@ const route: FastifyPluginAsyncZod = async (fastify, _) => {
                 positionBeforePing: z.coerce.number()
             })}
     }, async (request, reply) => {
-        let config = await fastify.prisma.queueConfig.findFirst().then((queueConfig) => queueConfig);
+        let config = await fastify.queueHandler.getQueueConfig();
 
         if (config === null) {
             reply.code(500);
@@ -27,14 +27,7 @@ const route: FastifyPluginAsyncZod = async (fastify, _) => {
 
         config.positionBeforePing = request.query.positionBeforePing;
 
-        await fastify.prisma.queueConfig.update({
-            where: {
-                id: config.id
-            },
-            data: config
-        }).then(async (config) => {
-            // refresh local copy of queueConfig
-            await fastify.getQueueConfig(true);
+        await fastify.queueHandler.updateQueueConfig(config).then(async (config) => {
             return reply.code(200).send(config);
         }).catch((e) => {
             reply.code(500);
