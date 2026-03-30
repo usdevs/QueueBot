@@ -10,13 +10,8 @@ const route: FastifyPluginAsync = async (fastify, _) => {
         reply.sse.keepAlive();
         fastify.queueHandler.addConnection(reply.sse);
 
-        reply.sse.onClose(() => {
-            console.log('Connection closed')
-        })
-
         await reply.sse.send({ data: 'Connected' + fastify.queueHandler.length()})
 
-        // fastify.prisma.admin.count().then((count) => console.log(count));
 
     });
 

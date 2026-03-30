@@ -56,9 +56,13 @@ export class QueueHandler {
 
     private notify(type: PayloadType, data: any) : void {
         this.clients = this.clients.filter((conn: SSEReplyInterface) => conn.isConnected);
-        const payload = JSON.stringify({type, data});
+        const payload = {type, data};
         this.clients.forEach((conn: SSEReplyInterface) => {
-            conn.send(payload);
+            conn.send({
+                id: "1",
+                event: 'update',
+                data: payload,
+            });
         })
 
     }
