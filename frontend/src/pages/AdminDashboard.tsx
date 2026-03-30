@@ -1,4 +1,5 @@
 import {useEffect, useState} from 'react';
+import { fetchEventSource } from '@microsoft/fetch-event-source';
 import {QueueStats} from './QueueStats';
 import {QueueControls} from './QueueControls';
 import {QueueList} from './QueueList';
@@ -20,6 +21,37 @@ export function AdminDashboard() {
 
     const [peopleAhead, setPeopleAhead] = useState(null);
 
+    const establishSSE = () => {
+
+        fetchEventSource(createPath(''), {
+            openWhenHidden: true,
+            method: 'GET',
+                headers: {
+                    Authorization: sessionStorage.getItem("jwt")!,
+            },
+            onmessage(event) {
+                console.log(event);
+                if (event.event == 'update') {
+                    try {
+                        const data = JSON.parse(event.data)
+                        if (data['type'] != null && data['type'] == 'CFG') {
+                            configUpdate(data['data']);
+                        }
+                    } catch (error) {
+                        console.error(error);
+                    }
+                }
+            },
+            onerror(error) {
+                console.error("SSE Error: ", error);
+            }
+        });
+    }
+
+    const configUpdate = (config: any)=> {
+        setIsPaused(!config['isOpen']);
+    }
+
     const handleRemove = async (id: string) => {
         await fetch(createPath(`queue/entries/${id}`),
             {method: "DELETE", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
@@ -30,23 +62,6 @@ export function AdminDashboard() {
 
             });
     };
-
-    const listenerFunction = ()=> {
-        const eventSource = new EventSource(createPath(''))
-
-        eventSource.onmessage = function(event) {
-            const data = JSON.parse(event.data)
-            console.log('Update event:', data)
-        }
-
-        eventSource.addEventListener('update', function(event) {
-            console.log('Update event:', JSON.parse(event.data))
-        })
-
-        eventSource.onerror = function(event) {
-            console.error('SSE error:', event)
-        }
-    }
 
     const handleLeaveQueue = async () => {
         await fetch(createPath(`queue/entries/me`),
@@ -111,22 +126,17 @@ export function AdminDashboard() {
     const handleTogglePause = async () => {
         await fetch(createPath(`queue/status?open=${isPaused}`),
             {method: "PATCH", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
-            .then(async (res) => {
-                if (res.status == 200) {
-                    setIsPaused(!(await res.json())['isOpen']);
-                }
-            });
     };
 
     const handleRefresh = async () => {
         await Promise.all([
-            fetch(createPath("queue/status"),
-                {method: "GET", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
-                .then(async (res) => {
-                    if (res.status == 200) {
-                        setIsPaused(!(await res.json())['status']);
-                    }
-                }),
+            // fetch(createPath("queue/status"),
+            //     {method: "GET", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
+            //     .then(async (res) => {
+            //         if (res.status == 200) {
+            //             setIsPaused(!(await res.json())['status']);
+            //         }
+            //     }),
             fetch(createPath("queue/entries/me"),
                 {method: "GET", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
                 .then(async (res) => {
@@ -149,16 +159,9 @@ export function AdminDashboard() {
     const userType = sessionStorage.getItem("user-type") as ("admin" | "user");
 
     useEffect(() => {
-        listenerFunction();
-        const fetchData = async () => {
-            fetch(createPath("queue/status"),
-                {method: "GET", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
-                .then(async (res) => {
-                    if (res.status == 200) {
-                        setIsPaused(!(await res.json())['status']);
-                    }
-                });
 
+        const fetchData = async () => {
+            establishSSE();
             if (userType == "admin") {
                 fetch(createPath("queue/entries"),
                     {method: "GET", headers: {Authorization: sessionStorage.getItem("jwt")!,}})

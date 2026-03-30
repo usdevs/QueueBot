@@ -30,7 +30,7 @@ fastify.setSerializerCompiler(serializerCompiler);
 await fastify.register(cors, {
     origin: true, // set this to frontend url for production
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'User-Id'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'User-Id', 'last-event-id'],
     credentials: true,
 });
 
