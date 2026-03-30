@@ -8,7 +8,7 @@ const route: FastifyPluginAsync = async (fastify, _) => {
         // get number of admins
 
         reply.sse.keepAlive();
-        fastify.queueHandler.add(reply.sse);
+        fastify.queueHandler.addConnection(reply.sse);
 
         reply.sse.onClose(() => {
             console.log('Connection closed')

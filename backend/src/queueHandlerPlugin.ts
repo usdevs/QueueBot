@@ -3,14 +3,19 @@ import {type FastifyInstance, type FastifyPluginAsync} from 'fastify'
 import type {SSEReplyInterface} from "@fastify/sse";
 import type {QueueConfigModel} from "./generated/prisma/models/QueueConfig.js";
 
+enum PayloadType {
+    CONFIG = "CFG",
+    LIST = "LST",
+}
+
 export class QueueHandler {
 
-    private sseConnections: SSEReplyInterface[]
+    private clients: SSEReplyInterface[]
     private cacheConfig: QueueConfigModel | undefined;
     private fastify: FastifyInstance;
 
     constructor(fastify: FastifyInstance) {
-        this.sseConnections = [];
+        this.clients = [];
         this.fastify = fastify;
         this.getQueueConfig();
     }
@@ -22,7 +27,11 @@ export class QueueHandler {
                 id: config.id
             },
             data: config
-        }).then((result) => this.cacheConfig = result);
+        }).then((result) => {
+            this.notify(PayloadType.CONFIG, result);
+            this.cacheConfig = result;
+            return result;
+        });
     }
 
     // QueueConfig should only be accessed through this function to reduce calls to DB
@@ -41,15 +50,21 @@ export class QueueHandler {
         return this.cacheConfig!;
     }
 
-    add(conn: SSEReplyInterface): void {
-        this.sseConnections.push(conn);
-        this.sseConnections = this.sseConnections.filter((conn: SSEReplyInterface) => conn.isConnected);
+    addConnection(conn: SSEReplyInterface): void {
+        this.clients.push(conn);
     }
 
-    private notify() : void {}
+    private notify(type: PayloadType, data: any) : void {
+        this.clients = this.clients.filter((conn: SSEReplyInterface) => conn.isConnected);
+        const payload = JSON.stringify({type, data});
+        this.clients.forEach((conn: SSEReplyInterface) => {
+            conn.send(payload);
+        })
+
+    }
 
     length(): number {
-        return this.sseConnections.length;
+        return this.clients.length;
     }
 
 }
