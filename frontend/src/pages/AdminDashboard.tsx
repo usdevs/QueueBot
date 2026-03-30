@@ -31,6 +31,23 @@ export function AdminDashboard() {
             });
     };
 
+    const listenerFunction = ()=> {
+        const eventSource = new EventSource(createPath(''))
+
+        eventSource.onmessage = function(event) {
+            const data = JSON.parse(event.data)
+            console.log('Update event:', data)
+        }
+
+        eventSource.addEventListener('update', function(event) {
+            console.log('Update event:', JSON.parse(event.data))
+        })
+
+        eventSource.onerror = function(event) {
+            console.error('SSE error:', event)
+        }
+    }
+
     const handleLeaveQueue = async () => {
         await fetch(createPath(`queue/entries/me`),
             {method: "DELETE", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
@@ -132,7 +149,7 @@ export function AdminDashboard() {
     const userType = sessionStorage.getItem("user-type") as ("admin" | "user");
 
     useEffect(() => {
-
+        listenerFunction();
         const fetchData = async () => {
             fetch(createPath("queue/status"),
                 {method: "GET", headers: {Authorization: sessionStorage.getItem("jwt")!,}})

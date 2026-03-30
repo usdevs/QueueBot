@@ -73,7 +73,7 @@ const route: FastifyPluginAsyncZod = async (fastify) => {
             const userId = request.userId!;
 
             // Queue must exist and be open
-            if (!(await fastify.getQueueConfig()).isOpen) {
+            if (!(await fastify.queueHandler.getQueueConfig()).isOpen) {
                 reply.code(400);
                 throw new Error("Queue is closed");
             }

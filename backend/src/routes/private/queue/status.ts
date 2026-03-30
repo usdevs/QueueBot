@@ -10,7 +10,7 @@ const route: FastifyPluginAsyncZod = async (fastify, _) => {
     * Checks if the queue is open
     */
     fastify.get('/status', async (request, reply) => {
-        return reply.code(200).send({status: (await fastify.getQueueConfig()).isOpen});
+        return reply.code(200).send({status: (await fastify.queueHandler.getQueueConfig()).isOpen});
     });
 
     /**
@@ -24,7 +24,7 @@ const route: FastifyPluginAsyncZod = async (fastify, _) => {
                 open: z.stringbool(),
             })}
         }, async (request, reply) => {
-        let config = await fastify.prisma.queueConfig.findFirst().then((queueConfig) => queueConfig);
+        let config = await fastify.queueHandler.getQueueConfig();
 
         if (config === null) {
             reply.code(500);
@@ -33,14 +33,7 @@ const route: FastifyPluginAsyncZod = async (fastify, _) => {
 
         config.isOpen = request.query.open;
 
-        await fastify.prisma.queueConfig.update({
-            where: {
-                id: config.id
-            },
-            data: config
-        }).then(async (config) => {
-            // update local copy of queueConfig
-            await fastify.getQueueConfig(true);
+        await fastify.queueHandler.updateQueueConfig(config).then(async (config) => {
             return reply.code(200).send(config);
         }).catch((e) => {
             reply.code(500);
