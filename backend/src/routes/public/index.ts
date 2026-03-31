@@ -8,10 +8,9 @@ const route: FastifyPluginAsync = async (fastify, _) => {
         // get number of admins
 
         reply.sse.keepAlive();
-        fastify.queueHandler.addConnection(reply.sse);
+        fastify.queueHandler.addConnection(reply.sse, true);
 
-        await reply.sse.send({ data: 'Connected' + fastify.queueHandler.length()})
-
+        await reply.sse.send({ data: 'Connected'})
 
     });
 
