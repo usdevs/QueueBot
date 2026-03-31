@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import { fetchEventSource } from '@microsoft/fetch-event-source';
+import {fetchEventSource} from '@microsoft/fetch-event-source';
 import {QueueStats} from './QueueStats';
 import {QueueControls} from './QueueControls';
 import {QueueList} from './QueueList';
@@ -21,13 +21,13 @@ export function AdminDashboard() {
 
     const [peopleAhead, setPeopleAhead] = useState(null);
 
-    const establishSSE = () => {
+    const establishSSE = (isAdmin: boolean) => {
 
-        fetchEventSource(createPath(''), {
+        fetchEventSource(createPath(isAdmin ? "queue/entries/subscribe" : "queue/me/subscribe"), {
             openWhenHidden: true,
             method: 'GET',
-                headers: {
-                    Authorization: sessionStorage.getItem("jwt")!,
+            headers: {
+                Authorization: sessionStorage.getItem("jwt")!,
             },
             onmessage(event) {
                 console.log(event);
@@ -36,6 +36,10 @@ export function AdminDashboard() {
                         const data = JSON.parse(event.data)
                         if (data['type'] != null && data['type'] == 'CFG') {
                             configUpdate(data['data']);
+                        } else if (data['type'] != null && data['type'] == 'LST') {
+                            (sessionStorage.getItem("user-type") as ("admin" | "user") == "admin")
+                                ? fetchAllEntries()
+                                : handleRefresh();
                         }
                     } catch (error) {
                         console.error(error);
@@ -48,7 +52,7 @@ export function AdminDashboard() {
         });
     }
 
-    const configUpdate = (config: any)=> {
+    const configUpdate = (config: any) => {
         setIsPaused(!config['isOpen']);
     }
 
@@ -75,6 +79,16 @@ export function AdminDashboard() {
             });
     };
 
+    const fetchAllEntries = async () => {
+        fetch(createPath("queue/entries"),
+            {method: "GET", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
+            .then(async (res) => {
+                if (res.status == 200) {
+                    reloadQueue((await res.json())['entries']);
+                }
+            });
+    }
+
     // transform the object list into a list of QueueEntry and update the queue
     const reloadQueue = (entries: any[]) => {
         setQueue(entries.map((entry) => {
@@ -84,6 +98,21 @@ export function AdminDashboard() {
                 id: entry['telegram_id']
             };
         }));
+    }
+
+    const handleRefresh = async () => {
+        await fetch(createPath("queue/entries/me"),
+            {method: "GET", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
+            .then(async (res) => {
+                if (res.status == 200) {
+                    const me = (await res.json());
+                    setPeopleAhead(me["ahead"]);
+                    if (me["name"] != undefined) {
+                        setInQueue(true);
+                        setUsername(me["name"]);
+                    }
+                }
+            });
     }
 
     // Unimplemented
@@ -98,14 +127,7 @@ export function AdminDashboard() {
             {method: "POST", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
             .then(async (res) => {
                 if (res.status == 200) {
-                    let entries: any[] = (await res.json())['entries'];
-                    setQueue(entries.map((entry) => {
-                        return {
-                            name: entry['name'],
-                            joinedAt: new Date(entry['timeCreated']),
-                            id: entry['telegram_id']
-                        };
-                    }));
+                    reloadQueue((await res.json())['entries']);
                 }
             });
     };
@@ -128,30 +150,6 @@ export function AdminDashboard() {
             {method: "PATCH", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
     };
 
-    const handleRefresh = async () => {
-        await Promise.all([
-            // fetch(createPath("queue/status"),
-            //     {method: "GET", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
-            //     .then(async (res) => {
-            //         if (res.status == 200) {
-            //             setIsPaused(!(await res.json())['status']);
-            //         }
-            //     }),
-            fetch(createPath("queue/entries/me"),
-                {method: "GET", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
-                .then(async (res) => {
-                    if (res.status == 200) {
-                        const me = (await res.json());
-                        setPeopleAhead(me["ahead"]);
-                        if (me["name"] != undefined) {
-                            setInQueue(true);
-                            setUsername(me["name"]);
-                        }
-                    }
-                })
-        ]);
-    }
-
     if (sessionStorage.getItem("jwt") == null) {
         return (<div>Error</div>);
     }
@@ -161,20 +159,8 @@ export function AdminDashboard() {
     useEffect(() => {
 
         const fetchData = async () => {
-            establishSSE();
-            if (userType == "admin") {
-                fetch(createPath("queue/entries"),
-                    {method: "GET", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
-                    .then(async (res) => {
-                        if (res.status == 200) {
-                            reloadQueue((await res.json())['entries']);
-                        }
-
-                    });
-            } else {
-                handleRefresh();
-            }
-
+            establishSSE(userType == "admin");
+            userType == "admin" ? fetchAllEntries() : handleRefresh();
         }
 
         fetchData();
@@ -183,51 +169,50 @@ export function AdminDashboard() {
 
     return (
         <Page>
-        <div className="min-h-screen bg-slate-950 text-white p-3 md:p-8">
-            <div className="max-w-7xl mx-auto">
-                {/* Header */}
-                <div
-                    className="bg-slate-900/50 backdrop-blur-sm rounded-xl md:rounded-2xl p-4 md:p-6 mb-4 md:mb-6 border border-slate-800">
-                    <h1 className="text-2xl md:text-3xl mb-1 md:mb-2">NUSC Queuebot</h1>
-                    {userType == "user" && inQueue ?
-                        <p className="text-2xl text-green-400">You Are Queued Up!</p> : null}
-                    {userType == "admin" ?
-                        <p className="text-sm md:text-base text-slate-400">Admin Dashboard</p> : null}
-                </div>
+            <div className="min-h-screen bg-slate-950 text-white p-3 md:p-8">
+                <div className="max-w-7xl mx-auto">
+                    {/* Header */}
+                    <div
+                        className="bg-slate-900/50 backdrop-blur-sm rounded-xl md:rounded-2xl p-4 md:p-6 mb-4 md:mb-6 border border-slate-800">
+                        <h1 className="text-2xl md:text-3xl mb-1 md:mb-2">NUSC Queuebot</h1>
+                        {userType == "user" && inQueue ?
+                            <p className="text-2xl text-green-400">You Are Queued Up!</p> : null}
+                        {userType == "admin" ?
+                            <p className="text-sm md:text-base text-slate-400">Admin Dashboard</p> : null}
+                    </div>
 
-                {/* Statistics */}
-                <QueueStats
-                    userType={userType}
-                    peopleAhead={peopleAhead}
-                    totalWaiting={queue.length}
-                    isInQueue={inQueue}
-                    isPaused={isPaused}
-                    onRefresh={handleRefresh}
-                />
-
-                {/* Controls */}
-                <QueueControls
-                    userType={userType}
-                    isPaused={isPaused}
-                    isInQueue={inQueue}
-                    onTogglePause={handleTogglePause}
-                    onJoinQueue={handleJoinQueue}
-                    onLeaveQueue={handleLeaveQueue}
-                    onAdvanceQueue={handleAdvanceQueue}
-                />
-
-                {/* Content */}
-                {userType == "admin" ?
-                    <QueueList
-                        queue={queue}
-                        onRemove={handleRemove}
+                    {/* Statistics */}
+                    <QueueStats
+                        userType={userType}
+                        peopleAhead={peopleAhead}
+                        totalWaiting={queue.length}
+                        isInQueue={inQueue}
                         isPaused={isPaused}
-                    /> : inQueue ? (<div
-                        className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700 overflow-hidden">
-                        <p className="text-3xl text-white text-center m-4">{`You are ${username}!`}</p>
-                    </div>) : null}
+                    />
+
+                    {/* Controls */}
+                    <QueueControls
+                        userType={userType}
+                        isPaused={isPaused}
+                        isInQueue={inQueue}
+                        onTogglePause={handleTogglePause}
+                        onJoinQueue={handleJoinQueue}
+                        onLeaveQueue={handleLeaveQueue}
+                        onAdvanceQueue={handleAdvanceQueue}
+                    />
+
+                    {/* Content */}
+                    {userType == "admin" ?
+                        <QueueList
+                            queue={queue}
+                            onRemove={handleRemove}
+                            isPaused={isPaused}
+                        /> : inQueue ? (<div
+                            className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700 overflow-hidden">
+                            <p className="text-3xl text-white text-center m-4">{`You are ${username}!`}</p>
+                        </div>) : null}
+                </div>
             </div>
-        </div>
         </Page>
     );
 }
