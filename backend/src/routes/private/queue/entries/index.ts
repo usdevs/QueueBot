@@ -5,6 +5,13 @@ import {z} from "zod";
 
 const route: FastifyPluginAsyncZod = async (fastify) => {
 
+
+    fastify.get('/subscribe', {preHandler: isAdmin, sse: true}, async (request, reply) => {
+        reply.sse.keepAlive();
+        fastify.queueHandler.addConnection(reply.sse, true);
+        await reply.sse.send({ data: 'Connected'})
+    });
+
     /**
      * GET /queue/entries
      * Returns the entire queue ordered from first to last (admin-only)
@@ -15,9 +22,7 @@ const route: FastifyPluginAsyncZod = async (fastify) => {
         async (_request, reply) => {
 
             try {
-                const entries = await fastify.prisma.queue.findMany({
-                    orderBy: {timeCreated: "asc"},
-                });
+            const entries = await fastify.queueHandler.getQueueEntries();
                 return reply.code(200).send({entries});
             } catch (e: any) {
                 reply.code(500);
@@ -34,33 +39,23 @@ const route: FastifyPluginAsyncZod = async (fastify) => {
             }),
         },
     }, async (request, reply) => {
-        await fastify.prisma.queue
+
+        await fastify.queueHandler.updateQueue(fastify.prisma.queue
             .delete({
                 where: {telegram_id: request.params.targetId},
-            })
-            .then( async () => {
+            })).then(async (entries) => {
+                return reply.code(200).send({entries});
+        }).catch((e: any) => {
+            // Prisma "record not found" error code (user not in queue)
+            if (e?.code === "P2025") {
+                reply.code(400);
+                throw new Error("User not in queue");
+            }
 
-                try {
-                    const entries = await fastify.prisma.queue.findMany({
-                        orderBy: {timeCreated: "asc"},
-                    });
-                    return reply.code(200).send({entries});
-                } catch (e: any) {
-                    reply.code(500);
-                    throw new Error("Failed to fetch updated queue entries");
-                }
+            reply.code(500);
+            throw new Error(e?.message ?? "Failed to remove user");
+        });
 
-            })
-            .catch((e: any) => {
-                // Prisma "record not found" error code (user not in queue)
-                if (e?.code === "P2025") {
-                    reply.code(400);
-                    throw new Error("User not in queue");
-                }
-
-                reply.code(500);
-                throw new Error(e?.message ?? "Failed to remove user");
-            });
     })
 
     /**
@@ -73,7 +68,7 @@ const route: FastifyPluginAsyncZod = async (fastify) => {
             const userId = request.userId!;
 
             // Queue must exist and be open
-            if (!(await fastify.getQueueConfig()).isOpen) {
+            if (!(await fastify.queueHandler.getQueueConfig()).isOpen) {
                 reply.code(400);
                 throw new Error("Queue is closed");
             }
@@ -94,20 +89,15 @@ const route: FastifyPluginAsyncZod = async (fastify) => {
             });
 
             // Add user to queue
-            await fastify.prisma.queue.create({
+            const allEntries = await fastify.queueHandler.updateQueue(fastify.prisma.queue.create({
                 data: {
                     name: name,
                     telegram_id: userId,
                     timeCreated: new Date(),
                 },
-            });
+            }))
 
             // Compute position and number of people ahead (for frontend)
-            const allEntries = await fastify.prisma.queue.findMany({
-                orderBy: {timeCreated: "asc"},
-                select: {telegram_id: true},
-            });
-
             const position =
                 allEntries.findIndex((e) => e.telegram_id === userId) + 1;
 

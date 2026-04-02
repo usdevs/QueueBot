@@ -1,6 +1,6 @@
 import 'fastify';
 import type {PrismaClient} from "./generated/prisma/client.js";
-import type {QueueConfigModel} from "./generated/prisma/models/QueueConfig.js";
+import type {QueueHandler} from "./queueHandlerPlugin.js";
 
 declare module 'fastify' {
     interface FastifyRequest {
@@ -11,7 +11,7 @@ declare module 'fastify' {
 declare module 'fastify' {
     interface FastifyInstance {
         prisma: PrismaClient
-        getQueueConfig(force?: boolean): Promise<QueueConfigModel>
+        queueHandler: QueueHandler
     }
 }
 

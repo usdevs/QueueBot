@@ -7,9 +7,7 @@ const route: FastifyPluginAsyncZod = async (fastify, _) => {
 
     fastify.post('/next', {preHandler: isAdmin}, async (request, reply) => {
 
-        const allEntries = await fastify.prisma.queue.findMany({
-            orderBy: {timeCreated: "asc"},
-        });
+        const allEntries = await fastify.queueHandler.getQueueEntries();
 
         if (allEntries.length === 0) {
             return reply.code(200).send({entries: []});
@@ -17,10 +15,10 @@ const route: FastifyPluginAsyncZod = async (fastify, _) => {
 
         const top = allEntries.shift();
         // remove top user from the queue
-        await fastify.prisma.queue.delete({where: {telegram_id: top!.telegram_id}});
+        await fastify.queueHandler.updateQueue(fastify.prisma.queue.delete({where: {telegram_id: top!.telegram_id}}));
 
         // pings the top n user
-        for (let i = 0; i < (await fastify.getQueueConfig()).positionBeforePing; i++) {
+        for (let i = 0; i < (await fastify.queueHandler.getQueueConfig()).positionBeforePing; i++) {
             if (allEntries[i] == undefined) {
                 break;
             }

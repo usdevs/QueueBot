@@ -8,9 +8,11 @@ import {
     serializerCompiler,
     type ZodTypeProvider
 } from 'fastify-type-provider-zod';
-import queueConfigPlugin from "./queueConfigPlugin.js";
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import fastifySSE from "@fastify/sse";
+import {queueHandlerPlugin} from "./queueHandlerPlugin.js";
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -28,9 +30,11 @@ fastify.setSerializerCompiler(serializerCompiler);
 await fastify.register(cors, {
     origin: true, // set this to frontend url for production
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'User-Id'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'User-Id', 'last-event-id'],
     credentials: true,
 });
+
+await fastify.register(fastifySSE.default);
 
 const authHook = async (request: FastifyRequest, reply: FastifyReply) => {
 
@@ -54,7 +58,7 @@ const authHook = async (request: FastifyRequest, reply: FastifyReply) => {
 // Init sql db connection
 fastify.register(prismaPlugin);
 // Register customs plugins
-fastify.register(queueConfigPlugin);
+fastify.register(queueHandlerPlugin);
 
 fastify.register((fastify) => {
 
