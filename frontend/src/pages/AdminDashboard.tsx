@@ -23,7 +23,7 @@ export function AdminDashboard() {
 
     const establishSSE = (isAdmin: boolean) => {
 
-        fetchEventSource(createPath(isAdmin ? "queue/entries/subscribe" : "queue/me/subscribe"), {
+        fetchEventSource(createPath(isAdmin ? "queue/entries/subscribe" : "queue/entries/me/subscribe"), {
             openWhenHidden: true,
             method: 'GET',
             headers: {
