@@ -30,7 +30,6 @@ export function AdminDashboard() {
                 Authorization: sessionStorage.getItem("jwt")!,
             },
             onmessage(event) {
-                console.log(event);
                 if (event.event == 'update') {
                     try {
                         const data = JSON.parse(event.data)
