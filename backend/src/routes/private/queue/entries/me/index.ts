@@ -1,5 +1,4 @@
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import {isAdmin} from "../../../../../shared.js";
 
 const route: FastifyPluginAsyncZod = async (fastify) => {
 
