@@ -28,7 +28,7 @@ export function HamburgerMenu({ onSettingsClick }: HamburgerMenuProps) {
       )}
 
       <nav
-        className={`fixed left-0 top-0 h-screen w-64 bg-slate-900 border-r border-slate-800 transform transition-transform md:hidden z-40 ${
+        className={`fixed left-0 top-0 h-screen w-64 bg-slate-900 border-r border-slate-800 transform transition-transform z-40 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
