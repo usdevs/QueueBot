@@ -1,3 +1,4 @@
+
 import {type FC, useEffect} from 'react';
 import {
   initData,
@@ -9,10 +10,16 @@ import { Page } from '@/components/Page.tsx';
 import {createPath} from "@/components/utils.ts";
 import {useNavigate} from "react-router-dom";
 
+
 export const InitDataPage: FC = () => {
   const initDataRaw = useSignal(initData.raw);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    navigate("/dashboard");
+  }, [navigate]);
+  
+  /*
   useEffect(() => {
 
     const initiateAuth = async () => {
@@ -30,6 +37,7 @@ export const InitDataPage: FC = () => {
     }
     initiateAuth();
   }, [initDataRaw]);
+  */
 
   if (!initDataRaw) {
     return (
