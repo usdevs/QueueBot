@@ -141,7 +141,15 @@ export function AdminDashboard() {
                         setIsPaused(!(await res.json())['status']);
                     }
                 }),
-            fetch(createPath("queue/entries/me"),
+        userType == "admin" ?
+            fetch(createPath("queue/entries"),
+                {method: "GET", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
+                .then(async (res) => {
+                    if (res.status == 200) {
+                        reloadQueue((await res.json())['entries']);
+                    }
+
+                }) : fetch(createPath("queue/entries/me"),
                 {method: "GET", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
                 .then(async (res) => {
                     if (res.status == 200) {
