@@ -26,17 +26,17 @@ const route: FastifyPluginAsyncZod = async (fastify, _) => {
             }
             let message;
             if (i == 0) {
-                message = `IT'S YOUR TURN NOW!!! Come Quickly to Cendana CR18`
+                message = `IT'S YOUR TURN NOW!!! Come Quickly!`
             } else {
-                message = `Your turn is coming up! Only ${i} person ahead.\nPlease start making your way to Cendana CR18.`
+                message = `Your turn is coming up! Only ${i} person ahead.\nPlease start making your way over.`
             }
             const queryString = new URLSearchParams(
                 {'chat_id': allEntries[i]!.telegram_id, 'text': message, 'parse_mode': 'Markdown'}).toString();
             console.log(message);
             // hit Telegram API to send user message
-            // fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?${queryString}`, {
-            //     method: 'POST',
-            // })
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?${queryString}`, {
+                method: 'POST',
+            })
         }
 
         return reply.code(200).send({entries: allEntries});
