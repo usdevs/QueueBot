@@ -25,7 +25,7 @@ export function AdminDashboard() {
 
         fetchEventSource(createPath(isAdmin ? "queue/entries/subscribe" : "queue/entries/me/subscribe"), {
             openWhenHidden: true,
-            method: 'GET',
+            method: 'POST',
             headers: {
                 Authorization: sessionStorage.getItem("jwt")!,
             },

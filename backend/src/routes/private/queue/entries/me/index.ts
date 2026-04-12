@@ -2,7 +2,7 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 
 const route: FastifyPluginAsyncZod = async (fastify) => {
 
-  fastify.get('/subscribe', {sse: true}, async (request, reply) => {
+  fastify.post('/subscribe', {sse: true}, async (request, reply) => {
     reply.sse.keepAlive();
     fastify.queueHandler.addConnection(reply.sse, false);
     // instruct NGINX to not buffer response
