@@ -158,6 +158,13 @@ export function AdminDashboard() {
     useEffect(() => {
 
         const fetchData = async () => {
+            await fetch(createPath("queue/status"),
+                {method: "GET", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
+                .then(async (res) => {
+                    if (res.status == 200) {
+                        setIsPaused(!(await res.json())['status']);
+                    }
+                });
             establishSSE(userType == "admin");
             userType == "admin" ? fetchAllEntries() : handleRefresh();
         }
