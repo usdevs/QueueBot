@@ -39,9 +39,9 @@ const route: FastifyPluginAsyncZod = async (fastify) => {
   fastify.get("/", async (request, reply) => {
     const userId = request.userId;
 
-    // Queue must exist and be open
+    // Queue must exist
     const config = await fastify.prisma.queueConfig.findFirst();
-    if (!config || !config.isOpen) {
+    if (!config) {
       reply.code(500);
       throw new Error("No queue configured");
     }
