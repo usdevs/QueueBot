@@ -5,6 +5,8 @@ const route: FastifyPluginAsyncZod = async (fastify) => {
   fastify.get('/subscribe', {sse: true}, async (request, reply) => {
     reply.sse.keepAlive();
     fastify.queueHandler.addConnection(reply.sse, false);
+    // instruct NGINX to not buffer response
+    reply.header('X-Accel-Buffering', 'no');
     await reply.sse.send({ data: 'Connected'})
   });
 
