@@ -109,6 +109,8 @@ export function AdminDashboard() {
                     if (me["name"] != undefined) {
                         setInQueue(true);
                         setUsername(me["name"]);
+                    } else {
+                        setInQueue(false);
                     }
                 }
             });
