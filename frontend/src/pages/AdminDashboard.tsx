@@ -7,10 +7,10 @@ import {createPath} from "@/components/utils.ts";
 import {Page} from "@/components/Page.tsx";
 import {SettingsAccordion} from '@/components/SettingsAccordion';
 
-interface Settings {
+export interface Settings {
     eventName: string;
     venue: string;
-    notifyBefore: number;
+    positionBeforePing: number;
 }
 
 export interface QueueEntry {
@@ -26,9 +26,9 @@ export function AdminDashboard() {
     const [username, setUsername] = useState("");
     const [peopleAhead, setPeopleAhead] = useState(null);
     const [settings, setSettings] = useState<Settings>({
-        eventName: 'NUSC Queue',
-        venue: 'Main Hall',
-        notifyBefore: 5,
+        eventName: '-',
+        venue: '-',
+        positionBeforePing: 0,
     });
 
     const establishSSE = (isAdmin: boolean) => {
@@ -62,6 +62,11 @@ export function AdminDashboard() {
     }
 
     const configUpdate = (config: any) => {
+        setSettings({
+            venue: config['venue'],
+            eventName: config['eventName'],
+            positionBeforePing: config['positionBeforePing'],
+        })
         setIsPaused(!config['isOpen']);
     }
 
@@ -161,6 +166,19 @@ export function AdminDashboard() {
             {method: "PATCH", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
     };
 
+    const handleUpdateQueueConfig = async (settings: Settings) => {
+        const queryString = new URLSearchParams(
+            {
+                'positionBeforePing': settings.positionBeforePing.toString(10),
+                'venue': settings.venue,
+                'eventName': settings.eventName
+            }).toString();
+        return await fetch(createPath(`queue/config?${queryString}`), {
+            method: "PATCH",
+            headers: {Authorization: sessionStorage.getItem("jwt")!,},
+        })
+    }
+
     if (sessionStorage.getItem("jwt") == null) {
         return (<div>Error</div>);
     }
@@ -170,11 +188,17 @@ export function AdminDashboard() {
     useEffect(() => {
 
         const fetchData = async () => {
-            await fetch(createPath("queue/status"),
+            await fetch(createPath("queue/info"),
                 {method: "GET", headers: {Authorization: sessionStorage.getItem("jwt")!,}})
                 .then(async (res) => {
                     if (res.status == 200) {
-                        setIsPaused(!(await res.json())['status']);
+                        const data = await res.json();
+                        setSettings({
+                            eventName: data.eventName,
+                            positionBeforePing: data.positionBeforePing,
+                            venue: data.venue,
+                        });
+                        setIsPaused(!data['status']);
                     }
                 });
             establishSSE(userType == "admin");
@@ -190,7 +214,8 @@ export function AdminDashboard() {
             <div className="min-h-screen bg-slate-950 text-white p-3 md:p-8">
                 <div className="max-w-7xl mx-auto">
                     {/* Header */}
-                    <div className="bg-slate-900/50 backdrop-blur-sm rounded-xl md:rounded-2xl p-4 md:p-6 mb-4 md:mb-6 border border-slate-800">
+                    <div
+                        className="bg-slate-900/50 backdrop-blur-sm rounded-xl md:rounded-2xl p-4 md:p-6 mb-4 md:mb-6 border border-slate-800">
                         <h1 className="text-2xl md:text-3xl mb-1 md:mb-2">{settings.eventName}</h1>
                         <p className="text-sm text-slate-400">Venue: {settings.venue}</p>
                         {userType === "admin" && (
@@ -202,6 +227,7 @@ export function AdminDashboard() {
                         <SettingsAccordion
                             settings={settings}
                             onSettingsChange={setSettings}
+                            onSaveSettings={handleUpdateQueueConfig}
                             userType={userType}
                         />
                     )}
@@ -234,7 +260,8 @@ export function AdminDashboard() {
                             isPaused={isPaused}
                         />
                     ) : inQueue ? (
-                        <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700 overflow-hidden">
+                        <div
+                            className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700 overflow-hidden">
                             <p className="text-3xl text-white text-center m-4">{`You are ${username}!`}</p>
                         </div>
                     ) : null}
