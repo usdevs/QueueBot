@@ -17,23 +17,25 @@ const route: FastifyPluginAsyncZod = async (fastify, _) => {
         // remove top user from the queue
         await fastify.queueHandler.updateQueue(fastify.prisma.queue.delete({where: {telegram_id: top!.telegram_id}}));
 
+        const config = await fastify.queueHandler.getQueueConfig();
+
         // pings the top n user
-        for (let i = 0; i < (await fastify.queueHandler.getQueueConfig()).positionBeforePing; i++) {
+        for (let i = 0; i < config.positionBeforePing; i++) {
             if (allEntries[i] == undefined) {
                 break;
             }
             let message;
             if (i == 0) {
-                message = `IT'S YOUR TURN NOW!!! Come Quickly to Cendana CR21`
+                message = `IT'S YOUR TURN NOW!!! Come Quickly to ${config.venue}`
             } else {
-                message = `Your turn is coming up! Only ${i} person ahead.\nPlease start making your way to Cendana CR21.`
+                message = `Your turn is coming up! Only ${i} person ahead.\nPlease start making your way to ${config.venue}.`
             }
             const queryString = new URLSearchParams(
                 {'chat_id': allEntries[i]!.telegram_id, 'text': message, 'parse_mode': 'Markdown'}).toString();
             //hit Telegram API to send user message
-            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?${queryString}`, {
-                method: 'POST',
-            })
+            // fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?${queryString}`, {
+            //     method: 'POST',
+            // })
         }
 
         return reply.code(200).send({entries: allEntries});

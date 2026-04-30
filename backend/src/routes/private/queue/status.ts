@@ -2,16 +2,7 @@ import {z} from 'zod';
 import type {FastifyPluginAsyncZod} from "fastify-type-provider-zod";
 import {isAdmin} from "../../../shared.js";
 
-
 const route: FastifyPluginAsyncZod = async (fastify, _) => {
-
-    /**
-    * GET /queue/status
-    * Checks if the queue is open
-    */
-    fastify.get('/status', async (request, reply) => {
-        return reply.code(200).send({status: (await fastify.queueHandler.getQueueConfig()).isOpen});
-    });
 
     /**
     * PATCH /queue/status (admin-only)

@@ -15,7 +15,9 @@ const route: FastifyPluginAsyncZod = async (fastify, _) => {
         preHandler: isAdmin,
         schema: {
             querystring: z.object({
-                positionBeforePing: z.coerce.number()
+                positionBeforePing: z.coerce.number(),
+                venue: z.coerce.string(),
+                eventName: z.coerce.string()
             })}
     }, async (request, reply) => {
         let config = await fastify.queueHandler.getQueueConfig();
@@ -26,6 +28,8 @@ const route: FastifyPluginAsyncZod = async (fastify, _) => {
         }
 
         config.positionBeforePing = request.query.positionBeforePing;
+        config.venue = request.query.venue;
+        config.eventName = request.query.eventName;
 
         await fastify.queueHandler.updateQueueConfig(config).then(async (config) => {
             return reply.code(200).send(config);
