@@ -8,10 +8,6 @@ interface QueueListProps {
 }
 
 export function QueueList({ queue, onRemove, isPaused }: QueueListProps) {
-  // const getWaitTime = (joinedAt: Date) => {
-  //   const minutes = Math.floor((Date.now() - joinedAt.getTime()) / 60000);
-  //   return minutes;
-  // };
 
   if (queue.length === 0) {
     return (

@@ -26,19 +26,6 @@ export function QueueStats({ userType, isInQueue, peopleAhead, totalWaiting, isP
             </div>
         </div>
 
-      {/*Disabled because unimplemented*/}
-      {/*<div className="bg-slate-800/50 backdrop-blur-sm rounded-lg md:rounded-xl p-3 md:p-5 border border-slate-700">*/}
-      {/*  <div className="flex flex-col md:flex-row items-start justify-between gap-2">*/}
-      {/*    <div className="flex-1">*/}
-      {/*      <p className="text-slate-400 text-xs md:text-sm mb-1">Completed Today</p>*/}
-      {/*      <p className="text-2xl md:text-3xl">{totalCompleted}</p>*/}
-      {/*    </div>*/}
-      {/*    <div className="bg-green-600/20 p-2 md:p-3 rounded-lg self-end md:self-start">*/}
-      {/*      <CheckCircle className="w-4 h-4 md:w-6 md:h-6 text-green-500" />*/}
-      {/*    </div>*/}
-      {/*  </div>*/}
-      {/*</div>*/}
-
       <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg md:rounded-xl p-3 md:p-5 border border-slate-700">
         <div className="flex flex-col md:flex-row items-start justify-between gap-2">
           <div className="flex-1">

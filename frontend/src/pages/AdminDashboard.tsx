@@ -5,6 +5,13 @@ import {QueueControls} from './QueueControls';
 import {QueueList} from './QueueList';
 import {createPath} from "@/components/utils.ts";
 import {Page} from "@/components/Page.tsx";
+import {SettingsAccordion} from '@/components/SettingsAccordion';
+
+interface Settings {
+    eventName: string;
+    venue: string;
+    notifyBefore: number;
+}
 
 export interface QueueEntry {
     id: string;
@@ -14,12 +21,15 @@ export interface QueueEntry {
 
 export function AdminDashboard() {
     const [isPaused, setIsPaused] = useState(false);
-
     const [queue, setQueue] = useState<QueueEntry[]>([]);
     const [inQueue, setInQueue] = useState(false);
     const [username, setUsername] = useState("");
-
     const [peopleAhead, setPeopleAhead] = useState(null);
+    const [settings, setSettings] = useState<Settings>({
+        eventName: 'NUSC Queue',
+        venue: 'Main Hall',
+        notifyBefore: 5,
+    });
 
     const establishSSE = (isAdmin: boolean) => {
 
@@ -180,14 +190,21 @@ export function AdminDashboard() {
             <div className="min-h-screen bg-slate-950 text-white p-3 md:p-8">
                 <div className="max-w-7xl mx-auto">
                     {/* Header */}
-                    <div
-                        className="bg-slate-900/50 backdrop-blur-sm rounded-xl md:rounded-2xl p-4 md:p-6 mb-4 md:mb-6 border border-slate-800">
-                        <h1 className="text-2xl md:text-3xl mb-1 md:mb-2">NUSC Queuebot</h1>
-                        {userType == "user" && inQueue ?
-                            <p className="text-2xl text-green-400">You Are Queued Up!</p> : null}
-                        {userType == "admin" ?
-                            <p className="text-sm md:text-base text-slate-400">Admin Dashboard</p> : null}
+                    <div className="bg-slate-900/50 backdrop-blur-sm rounded-xl md:rounded-2xl p-4 md:p-6 mb-4 md:mb-6 border border-slate-800">
+                        <h1 className="text-2xl md:text-3xl mb-1 md:mb-2">{settings.eventName}</h1>
+                        <p className="text-sm text-slate-400">Venue: {settings.venue}</p>
+                        {userType === "admin" && (
+                            <p className="text-sm md:text-base text-slate-400">Admin Dashboard</p>
+                        )}
                     </div>
+
+                    {userType === 'admin' && (
+                        <SettingsAccordion
+                            settings={settings}
+                            onSettingsChange={setSettings}
+                            userType={userType}
+                        />
+                    )}
 
                     {/* Statistics */}
                     <QueueStats
@@ -210,15 +227,17 @@ export function AdminDashboard() {
                     />
 
                     {/* Content */}
-                    {userType == "admin" ?
+                    {userType === "admin" ? (
                         <QueueList
                             queue={queue}
                             onRemove={handleRemove}
                             isPaused={isPaused}
-                        /> : inQueue ? (<div
-                            className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700 overflow-hidden">
+                        />
+                    ) : inQueue ? (
+                        <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700 overflow-hidden">
                             <p className="text-3xl text-white text-center m-4">{`You are ${username}!`}</p>
-                        </div>) : null}
+                        </div>
+                    ) : null}
                 </div>
             </div>
         </Page>
